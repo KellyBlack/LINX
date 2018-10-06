@@ -8,3 +8,5 @@ SOURCES += \
 
 HEADERS += \
     vector.h
+
+unix:!macx: LIBS += -lblas -llapack
