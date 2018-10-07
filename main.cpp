@@ -39,26 +39,26 @@ int main()
         A[0][innerLupe] = (double)innerLupe;
 
     for (innerLupe=0;innerLupe<8;++innerLupe)
-        A[1][innerLupe] = 2.0*(double)innerLupe;
+        A[1][innerLupe] = 2.0*(double)innerLupe+1;
 
     for (innerLupe=0;innerLupe<8;++innerLupe)
-        A[2][innerLupe] = 0.0; //3.0+(double)innerLupe;
+        A[2][innerLupe] = 3.0+(double)(innerLupe*innerLupe);
 
     for (innerLupe=0;innerLupe<8;++innerLupe)
-        A[3][innerLupe] = 0.0; //4.0;
+        A[3][innerLupe] = 4.0;
 
     printArray<double>(A,4,8);
     std::cout << "Starting" << std::endl;
-    A.swapRows(1,0);
-    printArray<double>(A,4,8);
-    std::cout << "Done" << std::endl;
+    //A.swapRows(1,0);
+    //printArray<double>(A,4,8);
+    //std::cout << "Done" << std::endl;
 
-    /*
+
     std::cout << std::endl << std::endl << "Starting" << std::endl;
     A.RREF();
     printArray<double>(A,4,8);
     std::cout << "Done" << std::endl;
-    */
+
     return 0;
 }
 

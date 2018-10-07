@@ -4,12 +4,13 @@
 #include <iostream>
 #include <math.h>
 
+/*
 extern "C" {
     extern void dswap_(int*,double*,int*,double*,int*);
     extern void daxpy_(int*,double*,double*,int*,double*,int*);
     extern void dscal_(int*,double*,double*,int*);
 }
-
+*/
 
 template <class field>
 class vector
@@ -74,6 +75,7 @@ public:
         delete [] u;
     }
 
+    // Routine to get a pointer to one row of the matrix using the [] operator
     field*& operator [] (int which)
     {
         if(which >= rows)
@@ -84,6 +86,7 @@ public:
         return(u[which]);
     }
 
+    // Routine to get a pointer to one row of the matrix using the [] operator
     field* operator [] (int which) const
     {
         if(which >= rows)
@@ -94,8 +97,12 @@ public:
         return(u[which]);
     }
 
+    // Routine to get the data when casting the type
     explicit operator field*() {return u[0];}
 
+    /* **************************************************************
+     * Routine to swap two given rows in the matrix.
+     * ************************************************************** */
     void swapRows(int firstRow,int secondRow)
     {
         // Set up the pointers to point at the first entry in each row.
@@ -113,29 +120,64 @@ public:
             *ptr1++ = *ptr2;
             *ptr2++ = tmp;
         }
-        //int skip = 1;
-        //dswap_(&columns,u[firstRow],&skip,u[secondRow],&skip);
     }
 
+    /* **************************************************************
+     * Routine to add one row of the matrix multipled by a constant
+     * to another row in the matrix.
+     * ************************************************************** */
+    void daxpy(field scaleValue,int changedRow,int sourceRow,int startColumn)
+    {
+        // Set up the pointers to point at the first entry in each row.
+        field *ptr1 = u[changedRow]+startColumn;
+        field *ptr2 = u[sourceRow]+startColumn;
+
+        for(int lupe=startColumn;lupe<columns;++lupe)
+        {
+            // go through each entry and perform the scale/add opteration
+            *ptr1++ += scaleValue*(*ptr2++);
+        }
+    }
+
+    /* **************************************************************
+     * Routine to go through a row in the matrix and multiply by a
+     * scalar value.
+     * ************************************************************** */
+    void dscal(field scaleValue,int whichRow,int startColumn)
+    {
+        // set up the pointer to point at the first entry in the row
+        field *ptr = u[whichRow] + startColumn;
+
+        // scale every entry in the vector.
+        for(int lupe=startColumn;lupe<columns;++lupe)
+            *ptr++ *= scaleValue;
+    }
+
+    /* **************************************************************
+     * Routine to determine the Reduced Row Echelon Form of the matrix.
+     * Performs the RREF in place with the current matrix.
+     * ************************************************************** */
     void RREF()
     {
+        // define various required variables.
         int outerLupe;
         int innerLupe;
-        int currentPivotColumn = 0;
+        int currentPivotColumn = 0; // used to indicate the current pivot column
 
-        for(outerLupe=0;outerLupe<rows;++outerLupe)
+        // Go through each row in the matrix.
+        // Figure out a new pivot row and then zero out the entries in the column
+        // and and below the current row.
+        for(outerLupe=0;(outerLupe<rows) && (currentPivotColumn<columns);++outerLupe)
         {
 
             // First figure out the current pivot.
             innerLupe = outerLupe; // assume that the pivot is in the first row available.
             while(currentPivotColumn < columns)
             {
-                std::cout << "Trying row " << innerLupe << std::endl;
                 // Start with the current row and work down.
                 if((fabs(u[innerLupe][currentPivotColumn])>1e-9))
                 {
                     // This entry in this column and row non-zero. Stop here and use this.
-                    std::cout << " looks good: " << currentPivotColumn << " - " << innerLupe << " row " << outerLupe << std::endl;
                     break;
                 }
                 else
@@ -144,21 +186,57 @@ public:
                     innerLupe += 1;    // check the next row.
                     if(innerLupe>=rows)
                     {
-                        std::cout << "Need to shift the pivot column :-( " << currentPivotColumn << std::endl;
                         // We have hit the last row. Everything must be zero. Move over to the next column and start over.
                         innerLupe = outerLupe;
                         currentPivotColumn += 1;
                     }
                 }
             }
-            std::cout << "Pivot: " << currentPivotColumn << " row: " << innerLupe << std::endl;
 
-            // zero out everything below the current pivot
+            if (currentPivotColumn<columns)
+            {
+                // The current row and pivot are valid.
+                // Can zero out the other rows in the current column
 
+                // First see if we need to swap rows.
+                if(innerLupe != outerLupe)
+                {
+                    // The next non-zero row is not the current row.
+                    swapRows(innerLupe,outerLupe);
+                }
+
+                // zero out everything above the current pivot
+                for(int lupe=0;lupe<outerLupe;++lupe)
+                {
+                    if(fabs(u[lupe][currentPivotColumn]) > 1e-9 )
+                    {
+                        // Need to zero out the column in this row....
+                        daxpy(-u[lupe][currentPivotColumn]/u[outerLupe][currentPivotColumn],
+                              lupe,outerLupe,currentPivotColumn);
+                    }
+                }
+
+                // zero out everything below the current pivot
+                for(int lupe=outerLupe+1;lupe<rows;++lupe)
+                {
+                    std::cout << "f row: " << outerLupe << " zero " << lupe << " column " << currentPivotColumn << std::endl;
+                    if(fabs(u[lupe][currentPivotColumn]) > 1e-9 )
+                    {
+                        // Need to zero out the column in this column....
+                        daxpy(-u[lupe][currentPivotColumn]/u[outerLupe][currentPivotColumn],
+                              lupe,outerLupe,currentPivotColumn);
+                    }
+                }
+
+                // scale the row so that the entry in pivot column is equal to one.
+                dscal(1.0/u[outerLupe][currentPivotColumn],outerLupe,currentPivotColumn);
+
+            }
+
+            // About to go on to the next row. Update the current pivot column to use the next column
+            currentPivotColumn += 1;
         }
 
-        //int skip = 1;
-        //dscal_(&columns,&mul,u[2],&skip);
     }
 
 private:
