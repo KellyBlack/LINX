@@ -1,6 +1,12 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+extern "C" {
+    extern void dswap_(int*,double*,int*,double*,int*);
+    extern void daxpy_(int*,double*,double*,int*,double*,int*);
+}
+
+
 template <class field>
 class vector
 {
@@ -75,6 +81,12 @@ public:
     }
 
     explicit operator field*() {return u[0];}
+
+    void swapRows(int firstRow,int secondRow)
+    {
+        int skip = 1;
+        dswap_(&columns,u[firstRow],&skip,u[secondRow],&skip);
+    }
 
 private:
     field **u;
