@@ -100,6 +100,13 @@ public:
     // Routine to get the data when casting the type
     explicit operator field*() {return u[0];}
 
+    // routine to get the number of rows in the matrix
+    int getNumberRows() { return(rows);}
+
+    // routine to get the number of columnss in the matrix
+    int getNumberColumns() { return(columns);}
+
+
     /* **************************************************************
      * Routine to swap two given rows in the matrix.
      * ************************************************************** */
@@ -219,7 +226,6 @@ public:
                 // zero out everything below the current pivot
                 for(int lupe=outerLupe+1;lupe<rows;++lupe)
                 {
-                    std::cout << "f row: " << outerLupe << " zero " << lupe << " column " << currentPivotColumn << std::endl;
                     if(fabs(u[lupe][currentPivotColumn]) > 1e-9 )
                     {
                         // Need to zero out the column in this column....
