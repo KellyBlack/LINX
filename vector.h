@@ -2,6 +2,7 @@
 #define VECTOR_H
 
 #include <iostream>
+#include <math.h>
 
 extern "C" {
     extern void dswap_(int*,double*,int*,double*,int*);
@@ -97,16 +98,67 @@ public:
 
     void swapRows(int firstRow,int secondRow)
     {
-        int skip = 1;
-        dswap_(&columns,u[firstRow],&skip,u[secondRow],&skip);
+        // Set up the pointers to point at the first entry in each row.
+        field *ptr1 = u[firstRow];
+        field *ptr2 = u[secondRow];
+
+        // intermediate values and loop variables required for the loop.
+        field tmp;
+        int lupe;
+
+        for(lupe=0;lupe<columns;++lupe)
+        {
+            // go through each entry in the vectors and exchange them.
+            tmp = *ptr1;
+            *ptr1++ = *ptr2;
+            *ptr2++ = tmp;
+        }
+        //int skip = 1;
+        //dswap_(&columns,u[firstRow],&skip,u[secondRow],&skip);
     }
 
     void RREF()
     {
-        double mul = 1.0/u[2][0];
-        std::cout << "Multiplier: " << mul << std::endl;
-        int skip = 1;
-        dscal_(&columns,&mul,u[2],&skip);
+        int outerLupe;
+        int innerLupe;
+        int currentPivotColumn = 0;
+
+        for(outerLupe=0;outerLupe<rows;++outerLupe)
+        {
+
+            // First figure out the current pivot.
+            innerLupe = outerLupe; // assume that the pivot is in the first row available.
+            while(currentPivotColumn < columns)
+            {
+                std::cout << "Trying row " << innerLupe << std::endl;
+                // Start with the current row and work down.
+                if((fabs(u[innerLupe][currentPivotColumn])>1e-9))
+                {
+                    // This entry in this column and row non-zero. Stop here and use this.
+                    std::cout << " looks good: " << currentPivotColumn << " - " << innerLupe << " row " << outerLupe << std::endl;
+                    break;
+                }
+                else
+                {
+                    // The entry in this column is essentially zero.
+                    innerLupe += 1;    // check the next row.
+                    if(innerLupe>=rows)
+                    {
+                        std::cout << "Need to shift the pivot column :-( " << currentPivotColumn << std::endl;
+                        // We have hit the last row. Everything must be zero. Move over to the next column and start over.
+                        innerLupe = outerLupe;
+                        currentPivotColumn += 1;
+                    }
+                }
+            }
+            std::cout << "Pivot: " << currentPivotColumn << " row: " << innerLupe << std::endl;
+
+            // zero out everything below the current pivot
+
+        }
+
+        //int skip = 1;
+        //dscal_(&columns,&mul,u[2],&skip);
     }
 
 private:
