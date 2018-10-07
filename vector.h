@@ -1,9 +1,12 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <iostream>
+
 extern "C" {
     extern void dswap_(int*,double*,int*,double*,int*);
     extern void daxpy_(int*,double*,double*,int*,double*,int*);
+    extern void dscal_(int*,double*,double*,int*);
 }
 
 
@@ -72,11 +75,21 @@ public:
 
     field*& operator [] (int which)
     {
+        if(which >= rows)
+        {
+            std::cout << "Row number out of bounds" << std::endl;
+            exit(1);
+        }
         return(u[which]);
     }
 
     field* operator [] (int which) const
     {
+        if(which >= rows)
+        {
+            std::cout << "Row number out of bounds" << std::endl;
+            exit(1);
+        }
         return(u[which]);
     }
 
@@ -86,6 +99,14 @@ public:
     {
         int skip = 1;
         dswap_(&columns,u[firstRow],&skip,u[secondRow],&skip);
+    }
+
+    void RREF()
+    {
+        double mul = 1.0/u[2][0];
+        std::cout << "Multiplier: " << mul << std::endl;
+        int skip = 1;
+        dscal_(&columns,&mul,u[2],&skip);
     }
 
 private:

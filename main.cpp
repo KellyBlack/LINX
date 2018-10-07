@@ -10,17 +10,18 @@ extern "C" {
 }
 
 template <class field>
-void printArray(matrix<field> A,int row,int col)
+void printArray(matrix<field> &A,int row,int col)
 {
     int innerLupe;
     int outerLupe;
 
+    std::cout << std::endl << std::endl << row << "-" << col << std::endl;
     for (outerLupe=0;outerLupe<row;++outerLupe)
     {
-        std::cout << std::endl << "(" << outerLupe << ")" << std::endl;
+        std::cout << std::endl << "(" << outerLupe << ")" << row << "-" << col << std::endl;
         for(innerLupe=0;innerLupe<col;++innerLupe)
         {
-            std::cout <<  A[outerLupe][innerLupe] << "  ";
+            std::cout <<  A[outerLupe][innerLupe]  << "  ";
         }
     }
     std::cout << std::endl;
@@ -48,9 +49,14 @@ int main()
 
     std::cout << "Starting" << std::endl;
     A.swapRows(0,3);
+    printArray<double>(A,4,8);
     std::cout << "Done" << std::endl;
 
+    std::cout << std::endl << std::endl << "Starting" << std::endl;
+    A.RREF();
     printArray<double>(A,4,8);
+    std::cout << "Done" << std::endl;
+
     return 0;
 }
 
