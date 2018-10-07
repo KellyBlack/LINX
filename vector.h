@@ -43,6 +43,8 @@ public:
 
     explicit operator field*() {return u;}
 
+    int getLength() { return(length);}
+
 private:
     field *u;
     int length;
