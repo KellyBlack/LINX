@@ -29,7 +29,16 @@ void printArray(matrix<field> &A,int row,int col)
     int innerLupe;
     int outerLupe;
 
-    std::cout << std::endl << std::endl << row << "-" << col << std::endl;
+
+    std::cout << std::endl << std::endl << row << "-" << col << std::endl << "      ";
+
+    // Print out the top row that has column numbers
+    for(innerLupe=0;innerLupe<col;++innerLupe)
+    {
+        std::cout <<  "(" << std::setw(2) << innerLupe << ") ";
+    }
+    std::cout << std::endl;
+
     for (outerLupe=0;outerLupe<row;++outerLupe)
     {
         std::cout << std::endl << "(" << outerLupe << ")" << row << " ";
@@ -42,7 +51,7 @@ void printArray(matrix<field> &A,int row,int col)
 }
 
 
-// ROutine to see if a given column is already listed in the
+// Routine to see if a given column is already listed in the
 // vector of indicies to check.
 bool columnExists(vector<int> *indicies,int currentRow,int value)
 {
@@ -55,6 +64,45 @@ bool columnExists(vector<int> *indicies,int currentRow,int value)
     return(false);
 }
 
+// Routine to see if a given collection of columns has already been considered.
+// The idea is that if the coresponding entries in the RREF are non-zero, and
+// the column numbers are in descending order, then the set has already been
+// considered.
+bool columnsConsidered(matrix<double> *rref,
+                       vector<int> *indicies,
+                       int currentRow,
+                       int currentColumn)
+{
+
+    bool considered = false;
+
+    //std::cout << "checking: " << (*indicies)[currentRow] << "/" << currentRow << "/" << currentColumn << " " << std::endl;
+    //printVector(*indicies);
+    for(int lupe=0;!considered && (lupe<(currentRow-1));++lupe)
+    {
+        if((*indicies)[lupe]>(*indicies)[currentRow])
+        {
+            for(int rowCheck=0;!considered && (rowCheck<(currentRow-1));++rowCheck)
+            {
+                /*
+                std::cout << std::setw(5) << (*rref)[rowCheck][(*indicies)[rowCheck]]
+                          << std::setw(5) << (*rref)[currentRow][(*indicies)[rowCheck]]
+                          << std::setw(5) << (*rref)[rowCheck][currentColumn]
+                          << std::setw(5) << (*rref)[currentRow][currentColumn]
+                               << std::endl;
+                               */
+                 considered = considered ||
+                         (fabs((*rref)[rowCheck][(*indicies)[rowCheck]] *
+                            (*rref)[currentRow][(*indicies)[rowCheck]] *
+                            (*rref)[rowCheck][currentColumn] *
+                            (*rref)[currentRow][currentColumn]) > 1e-4 );
+            }
+        }
+    }
+
+    // if we get here then the set of columns have not been considered previously.
+    return(considered);
+}
 
 /* *******************************************************************************
  * Routine to go through the RREF of the matrix and get all combinations of the
@@ -71,14 +119,16 @@ void checkColumns(matrix<double> *rref, vector<int> *indicies,int currentRow)
     int lupe;
     for(lupe=0;lupe<rref->getNumberColumns();++lupe)
     {
-        if((fabs((*rref)[currentRow][lupe])>1.0e-9)&&(!columnExists(indicies,currentRow,lupe)))
+        (*indicies)[currentRow] = lupe;
+        if((fabs((*rref)[currentRow][lupe])>1.0e-9) &&
+                (!columnExists(indicies,currentRow,lupe)) &&
+                (!columnsConsidered(rref,indicies,currentRow,lupe)))
         {
             // This entry in the RREF matrix is non-zer0.
             // The column has also not been checked previously.
             // It is a potential column to check.
 
             // Add this column to the list of columns currently under consideration.
-            (*indicies)[currentRow] = lupe;
             if( (currentRow+1) >= rref->getNumberRows())
             {
                 // We now have a full list of columns to check.
