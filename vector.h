@@ -67,6 +67,15 @@ template <class field>
 class matrix
 {
 public:
+    // Default constructor
+    matrix()
+    {
+        std::cout << "Base constructor" << std::endl;
+        u = NULL;
+        rows = -1;
+        columns = -1;
+    }
+
     // Constructor that takes the number rows, columns, and initial value.
     matrix(int numRows,int numColumns,field initial=0)
     {
@@ -95,7 +104,6 @@ public:
         while(fp)
         {
             std::getline(fp,inputLine);
-            std::cout << inputLine << std::endl;
             if(lineNumber++ <= 0)
             {
                 // Ths is the first line in the file.
@@ -103,7 +111,6 @@ public:
                 int comma = inputLine.find(',');                                   // Figure out where the comma is.
                 rows    = std::stoi(inputLine.substr(0,comma));                    // Get the number of rows.
                 columns = std::stoi(inputLine.substr(comma+1,inputLine.length())); // Get the number of columns.
-                std::cout << rows << " - " << columns << std::endl;
 
                 // Allocate the space used by the array.
                 u = new field*[rows];
@@ -115,7 +122,7 @@ public:
             {
                 // This is a row that has entries for the matrix.
                 // Assume it is comma separated numbers.
-                int comma = inputLine.find(',');  // Figure out where the comma is.
+                uint comma = inputLine.find(',');  // Figure out where the comma is.
                 int columnNumber = 0;
                 while((comma>=0) && (comma < inputLine.length()) && (inputLine.length()>0) )
                 {
@@ -136,6 +143,8 @@ public:
     {
         delete u[0];
         delete [] u;
+        rows = -1;
+        columns = -1;
     }
 
     // Routine to get a pointer to one row of the matrix using the [] operator
@@ -158,6 +167,40 @@ public:
             exit(1);
         }
         return(u[which]);
+    }
+
+    // Routine used for assignment
+    matrix& operator= (matrix<field>& other)
+    {
+        if(this != &other)
+        {
+            if(rows >= 0)
+            {
+                // Need to delete the current memory....
+                delete u[0];
+                delete [] u;
+            }
+
+            // Set the number of rows and columns.
+            rows = other.getNumberRows();
+            columns = other.getNumberColumns();
+
+            // Allocate the space used by the array.
+            u = new field*[rows];
+            u[0] = new field[rows*columns];
+            for(int rowLupe=0;rowLupe<rows;++rowLupe)
+                u[rowLupe] = u[0] + rowLupe*columns;
+
+            // Finally copy everything over....
+            for(int rowLupe=0;rowLupe<rows;++rowLupe)
+                for(int colLupe=0;colLupe<columns;++colLupe)
+                {
+                    u[rowLupe][colLupe] = other[rowLupe][colLupe];
+                }
+
+        }
+
+        return(*this);
     }
 
     // Routine to get the data when casting the type
@@ -339,9 +382,9 @@ public:
 
 
 private:
-    field **u;
-    int rows;
-    int columns;
+    field **u = NULL;
+    int rows = -1;
+    int columns = -1;
 };
 
 
