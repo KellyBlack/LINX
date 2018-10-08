@@ -104,6 +104,10 @@ bool columnsConsidered(matrix<double> *rref,
     return(considered);
 }
 
+// http://www.netlib.org/lapack/lug/node80.html
+// http://www.netlib.org/lapack/explore-html/d7/d3b/group__double_g_esolve_ga5ee879032a8365897c3ba91e3dc8d512.html#ga5ee879032a8365897c3ba91e3dc8d512
+// http://www.netlib.org/lapack/explore-html/dd/d9a/group__double_g_ecomputational_ga188b8d30443d14b1a3f7f8331d87ae60.html#ga188b8d30443d14b1a3f7f8331d87ae60
+
 /* *******************************************************************************
  * Routine to go through the RREF of the matrix and get all combinations of the
  * columns that have non-zero entries in the RREF of the matrix.
