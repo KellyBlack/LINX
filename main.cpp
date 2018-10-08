@@ -5,50 +5,13 @@
 
 //using namespace std;
 
-/*
+
 extern "C" {
     extern void dswap_(int*,double*,int*,double*,int*);
     extern void daxpy_(int*,double*,double*,int*,double*,int*);
 }
-*/
-
-// Routine to print out a vector to the console
-template <class field>
-void printVector(vector<field> &v)
-{
-    std::cout << v[0];
-    for(int lupe=1;lupe<v.getLength();++lupe)
-        std::cout << "," << v[lupe];
-    std::cout << std::endl;
-}
-
-// Routine to print out an array to the console.
-template <class field>
-void printArray(matrix<field> &A,int row,int col)
-{
-    int innerLupe;
-    int outerLupe;
 
 
-    std::cout << std::endl << std::endl << row << "-" << col << std::endl << "      ";
-
-    // Print out the top row that has column numbers
-    for(innerLupe=0;innerLupe<col;++innerLupe)
-    {
-        std::cout <<  "(" << std::setw(2) << innerLupe << ") ";
-    }
-    std::cout << std::endl;
-
-    for (outerLupe=0;outerLupe<row;++outerLupe)
-    {
-        std::cout << std::endl << "(" << outerLupe << ")" << row << " ";
-        for(innerLupe=0;innerLupe<col;++innerLupe)
-        {
-            std::cout <<  std::setw(4) << A[outerLupe][innerLupe]  << " ";
-        }
-    }
-    std::cout << std::endl;
-}
 
 
 // Routine to see if a given column is already listed in the
@@ -107,6 +70,14 @@ bool columnsConsidered(matrix<double> *rref,
 // http://www.netlib.org/lapack/lug/node80.html
 // http://www.netlib.org/lapack/explore-html/d7/d3b/group__double_g_esolve_ga5ee879032a8365897c3ba91e3dc8d512.html#ga5ee879032a8365897c3ba91e3dc8d512
 // http://www.netlib.org/lapack/explore-html/dd/d9a/group__double_g_ecomputational_ga188b8d30443d14b1a3f7f8331d87ae60.html#ga188b8d30443d14b1a3f7f8331d87ae60
+/* *******************************************************************************
+ * Routine to check a given set of columns and get the condition number for
+ * the columns from the original matrix.
+ * ******************************************************************************* */
+void testFullColumnSet(matrix<double> *rref, vector<int> *indicies)
+{
+    indicies->printVector();
+}
 
 /* *******************************************************************************
  * Routine to go through the RREF of the matrix and get all combinations of the
@@ -136,7 +107,7 @@ void checkColumns(matrix<double> *rref, vector<int> *indicies,int currentRow)
             if( (currentRow+1) >= rref->getNumberRows())
             {
                 // We now have a full list of columns to check.
-                printVector(*indicies);
+                testFullColumnSet(rref,indicies);
             }
             else
             {
@@ -176,10 +147,10 @@ int main()
     }
     A[3][0] = -1.0;
 
-    printArray<double>(A,4,8);
+    A.printArray();
     std::cout << std::endl << std::endl << "Starting" << std::endl;
     A.RREF();
-    printArray<double>(A,4,8);
+    A.printArray();
     checkColumns(&A,&indicies,0);
     std::cout << "Done" << std::endl;
 

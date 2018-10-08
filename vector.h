@@ -45,6 +45,16 @@ public:
 
     int getLength() { return(length);}
 
+    // Routine to print out a vector to the console
+    void printVector()
+    {
+        std::cout << u[0];
+        for(int lupe=1;lupe<getLength();++lupe)
+            std::cout << "," << u[lupe];
+        std::cout << std::endl;
+    }
+
+
 private:
     field *u;
     int length;
@@ -245,7 +255,37 @@ public:
             currentPivotColumn += 1;
         }
 
+
     }
+
+
+    // Function to print out the whole array
+    void printArray()
+    {
+        int innerLupe;
+        int outerLupe;
+
+
+        std::cout << std::endl << std::endl << getNumberRows() << "-" << getNumberColumns() << std::endl << "      ";
+
+        // Print out the top row that has column numbers
+        for(innerLupe=0;innerLupe<getNumberColumns();++innerLupe)
+        {
+            std::cout <<  "(" << std::setw(2) << innerLupe << ") ";
+        }
+        std::cout << std::endl;
+
+        for (outerLupe=0;outerLupe<getNumberRows();++outerLupe)
+        {
+            std::cout << std::endl << "(" << outerLupe << ")" << getNumberRows()<< " ";
+            for(innerLupe=0;innerLupe<getNumberColumns();++innerLupe)
+            {
+                std::cout <<  std::setw(4) << u[outerLupe][innerLupe]  << " ";
+            }
+        }
+        std::cout << std::endl;
+    }
+
 
 private:
     field **u;
