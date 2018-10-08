@@ -138,6 +138,28 @@ public:
         fp.close();
     }
 
+    // Constructor based on a passing another instance of a matrix.
+    matrix(matrix<field>& other)
+    {
+        // Set the number of rows and columns.
+        rows = other.getNumberRows();
+        columns = other.getNumberColumns();
+
+        // Allocate the space used by the array.
+        u = new field*[rows];
+        u[0] = new field[rows*columns];
+        for(int rowLupe=0;rowLupe<rows;++rowLupe)
+            u[rowLupe] = u[0] + rowLupe*columns;
+
+        // Finally copy everything over....
+        for(int rowLupe=0;rowLupe<rows;++rowLupe)
+            for(int colLupe=0;colLupe<columns;++colLupe)
+            {
+                u[rowLupe][colLupe] = other[rowLupe][colLupe];
+            }
+    }
+
+
     // Destructor that deletes the memore allocated in the vector u.
     ~matrix()
     {

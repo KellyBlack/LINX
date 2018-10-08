@@ -125,16 +125,14 @@ int main()
     std::cout << std::endl << std::endl << "Starting" << std::endl;
     vector<double> v(10,1.0);
     matrix<double> A("oyster.txt");
-    matrix<double> B;
-    B = A;
+    matrix<double> B(A);
     vector<int>    indicies(A.getNumberRows(),-1);
 
     A.printArray();
     B.printArray();
-    return(-1);
     A.RREF();
     A.printArray();
-    checkColumns(&A,&indicies,0);
+    //checkColumns(&A,&indicies,0);
     std::cout << "Done" << std::endl;
 
     return 0;
