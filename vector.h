@@ -2,7 +2,9 @@
 #define VECTOR_H
 
 #include <iostream>
+#include <fstream>
 #include <math.h>
+#include <string>
 
 /*
 extern "C" {
@@ -65,6 +67,7 @@ template <class field>
 class matrix
 {
 public:
+    // Constructor that takes the number rows, columns, and initial value.
     matrix(int numRows,int numColumns,field initial=0)
     {
         rows    = numRows;
@@ -81,6 +84,54 @@ public:
         }
     }
 
+    // Constructor that takes the name of a file and reads the
+    // matrix from the file.
+    matrix(std::string fileName)
+    {
+        std::ifstream fp(fileName); // Open a file to read.
+        std::string inputLine;
+        int lineNumber = 0;
+
+        while(fp)
+        {
+            std::getline(fp,inputLine);
+            std::cout << inputLine << std::endl;
+            if(lineNumber++ <= 0)
+            {
+                // Ths is the first line in the file.
+                // Assume it is in the form of row,column
+                int comma = inputLine.find(',');                                   // Figure out where the comma is.
+                rows    = std::stoi(inputLine.substr(0,comma));                    // Get the number of rows.
+                columns = std::stoi(inputLine.substr(comma+1,inputLine.length())); // Get the number of columns.
+                std::cout << rows << " - " << columns << std::endl;
+
+                // Allocate the space used by the array.
+                u = new field*[rows];
+                u[0] = new field[rows*columns];
+                for(int rowLupe=0;rowLupe<rows;++rowLupe)
+                    u[rowLupe] = u[0] + rowLupe*columns;
+            }
+            else
+            {
+                // This is a row that has entries for the matrix.
+                // Assume it is comma separated numbers.
+                int comma = inputLine.find(',');  // Figure out where the comma is.
+                int columnNumber = 0;
+                while((comma>=0) && (comma < inputLine.length()) && (inputLine.length()>0) )
+                {
+                    std::string number = inputLine.substr(0,comma);           // Get the next number
+                    inputLine = inputLine.substr(comma+1,inputLine.length()); // Remove the next number from the line
+                    u[lineNumber-2][columnNumber++] = std::stod(number);      // Save the number in the array
+                    comma = inputLine.find(',');                              // Figure out where the comma is.
+                }
+
+            }
+        }
+
+        fp.close();
+    }
+
+    // Destructor that deletes the memore allocated in the vector u.
     ~matrix()
     {
         delete u[0];

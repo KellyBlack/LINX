@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <string>
 
 #include "vector.h"
 
@@ -121,34 +122,12 @@ void checkColumns(matrix<double> *rref, vector<int> *indicies,int currentRow)
 
 int main()
 {
+    std::cout << std::endl << std::endl << "Starting" << std::endl;
     vector<double> v(10,1.0);
-    matrix<double> A(4,8,0.0);
+    matrix<double> A("oyster.txt");
     vector<int>    indicies(A.getNumberRows(),-1);
-    int innerLupe;
-    int outerLupe;
-
-    //double* u = (double*)A;
-    for (innerLupe=0;innerLupe<8;++innerLupe)
-        A[0][innerLupe] = 1.0;
-    A[0][7] = 0;
-    A[0][6] = 0;
-
-    for (innerLupe=0;innerLupe<8;innerLupe+=2)
-        A[1][innerLupe] = 1.0;
-
-    for (innerLupe=0;innerLupe<8;++innerLupe+=3)
-        A[2][innerLupe] = 1.0;
-
-    double val = 1.0;
-    for (innerLupe=0;innerLupe<8;++innerLupe)
-    {
-        A[3][innerLupe] = val;
-        val *= -1.0;
-    }
-    A[3][0] = -1.0;
 
     A.printArray();
-    std::cout << std::endl << std::endl << "Starting" << std::endl;
     A.RREF();
     A.printArray();
     checkColumns(&A,&indicies,0);
