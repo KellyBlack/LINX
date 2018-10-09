@@ -7,11 +7,6 @@
 //using namespace std;
 
 
-extern "C" {
-    extern void dswap_(int*,double*,int*,double*,int*);
-    extern void daxpy_(int*,double*,double*,int*,double*,int*);
-}
-
 
 
 
@@ -140,7 +135,8 @@ int main()
     indicies[5] = 11;
     C.copyColumnsToRows(A,indicies);
     C.printArray();
-    std::cout << "Result of LU Decomposition: " << C.dgetrf() << std::endl;
+    //std::cout << "Result of LU Decomposition: " << C.dgetrf() << std::endl;
+    std::cout << "The reciprocol of the condition number: " << C.dgecon(true) << std::endl;
     C.printArray();
     A.RREF();
     A.printArray();

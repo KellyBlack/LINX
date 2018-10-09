@@ -12,6 +12,7 @@ extern "C" {
     //extern void daxpy_(int*,double*,double*,int*,double*,int*);
     //extern void dscal_(int*,double*,double*,int*);
     extern void dgetrf_(int*,int*,double*,int*,int*,int*);
+    extern void dgecon_(char*,int*,double*,int*,double*,double*,double*,int*,int*);
 }
 
 
@@ -487,6 +488,47 @@ public:
         // Clean up and return the result.
         return(result);
     }
+
+    /* *************************************************************************
+     * Routine to approximate the reciprocal of the condition number of the
+     * current matrix.
+     * Calls the LAPACK dgecon_ routine.
+     * ************************************************************************* */
+    double dgecon(int performLU)
+    {
+        // see if the lu decomposition has been performed. If necessary
+        // go ahead and decompose the matrix.
+        if(performLU)
+        {
+            if(dgetrf()!=0)
+                return(0.0);
+        }
+
+        // Determine the necessary parameters for the call to the routine
+        // to estimate the condition number.
+        char which = '1';
+        int numRows = this->rows;
+        int LDA = numRows;
+        double norm = 1.0;
+        double cond;
+        double *work = new double[4*numRows];
+        int *iwork   = new int[numRows];
+        int result;
+
+        // Call dgecon to get the condition number.
+        dgecon_(&which,&numRows,this->u[0],&LDA,&norm,&cond,work,iwork,&result);
+
+        // clean up the mess.
+        delete [] work;
+        delete [] iwork;
+
+        // return the condition number.
+        if(result==0)
+            return(cond);
+        else
+            return(0.0);
+    }
+
 
 };
 
