@@ -126,10 +126,22 @@ int main()
     vector<double> v(10,1.0);
     matrix<double> A("oyster.txt");
     matrix<double> B(A);
+    squareMatrix<double> C(A.getNumberRows(),0.0);
     vector<int>    indicies(A.getNumberRows(),-1);
 
     A.printArray();
     B.printArray();
+
+    indicies[0] = 0;
+    indicies[1] = 1;
+    indicies[2] = 3;
+    indicies[3] = 4;
+    indicies[4] = 5;
+    indicies[5] = 11;
+    C.copyColumnsToRows(A,indicies);
+    C.printArray();
+    std::cout << "Result of LU Decomposition: " << C.dgetrf() << std::endl;
+    C.printArray();
     A.RREF();
     A.printArray();
     //checkColumns(&A,&indicies,0);

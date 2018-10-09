@@ -6,13 +6,14 @@
 #include <math.h>
 #include <string>
 
-/*
+
 extern "C" {
-    extern void dswap_(int*,double*,int*,double*,int*);
-    extern void daxpy_(int*,double*,double*,int*,double*,int*);
-    extern void dscal_(int*,double*,double*,int*);
+    //extern void dswap_(int*,double*,int*,double*,int*);
+    //extern void daxpy_(int*,double*,double*,int*,double*,int*);
+    //extern void dscal_(int*,double*,double*,int*);
+    extern void dgetrf_(int*,int*,double*,int*,int*,int*);
 }
-*/
+
 
 template <class field>
 class vector
@@ -70,10 +71,10 @@ public:
     // Default constructor
     matrix()
     {
-        std::cout << "Base constructor" << std::endl;
         u = NULL;
         rows = -1;
         columns = -1;
+        index = NULL;
     }
 
     // Constructor that takes the number rows, columns, and initial value.
@@ -91,6 +92,7 @@ public:
                 u[rowLupe][columnLupe] = initial;
             }
         }
+        createIndexPermutation();
     }
 
     // Constructor that takes the name of a file and reads the
@@ -135,6 +137,7 @@ public:
             }
         }
 
+        createIndexPermutation();
         fp.close();
     }
 
@@ -157,10 +160,22 @@ public:
             {
                 u[rowLupe][colLupe] = other[rowLupe][colLupe];
             }
+
+        createIndexPermutation();
     }
 
 
-    // Destructor that deletes the memore allocated in the vector u.
+    // routine to initialize the index vector that holds the current row permutations.
+    void createIndexPermutation()
+    {
+        // Create the index vector that holds the row permutations.
+        index = new int[rows];
+        int *ptr = index;
+        for(int lupe=0;lupe<rows;++lupe)
+            *ptr++ = lupe;  // set the inital value to be the same row number so not permutations.
+    }
+
+    // Destructor that deletes the memory allocated in the vector u.
     ~matrix()
     {
         delete u[0];
@@ -168,6 +183,7 @@ public:
         rows = -1;
         columns = -1;
     }
+
 
     // Routine to get a pointer to one row of the matrix using the [] operator
     field*& operator [] (int which)
@@ -215,10 +231,13 @@ public:
 
             // Finally copy everything over....
             for(int rowLupe=0;rowLupe<rows;++rowLupe)
+            {
+                index[rowLupe] = other.getRowIndex(rowLupe);
                 for(int colLupe=0;colLupe<columns;++colLupe)
                 {
                     u[rowLupe][colLupe] = other[rowLupe][colLupe];
                 }
+            }
 
         }
 
@@ -234,6 +253,11 @@ public:
     // routine to get the number of columnss in the matrix
     int getNumberColumns() { return(columns);}
 
+    // Routine to get the value of the index vector at a certain place.
+    int getRowIndex(int which)
+    {
+        return(index[which]);
+    }
 
     /* **************************************************************
      * Routine to swap two given rows in the matrix.
@@ -403,12 +427,67 @@ public:
     }
 
 
-private:
-    field **u = NULL;
-    int rows = -1;
-    int columns = -1;
+protected:
+    field **u = NULL;  // the matrix itslef.
+    int rows = -1;     // number of rows in the matrix
+    int columns = -1;  // number of columns in the matrix
+    int* index;        // variable used to hold the current row permutations.
 };
 
 
+template <class field>
+class squareMatrix : public matrix<field>
+{
+public:
+    squareMatrix() : matrix<field>() {  }
+
+    squareMatrix(int numberRows,field initialValue=0) : matrix<field>(numberRows,numberRows,initialValue) {}
+    //squareMatrix(matrix<field>& A) : matrix<field>(A){createIndexPermutation();}
+
+    /* *************************************************************************
+     * Routine to copy over the columns of a given matrix into the rows
+     * of this matrix. The columns to copy are given in a vector of integers.
+     * ************************************************************************* */
+    void copyColumnsToRows(matrix<field>& source,vector<int>indicies)
+    {
+        field* ptr;
+        for(int columnLupe=0;columnLupe<indicies.getLength();++columnLupe)
+        {
+            ptr = this->u[columnLupe];
+            for(int lupe=0;lupe<this->rows;++lupe)
+                *ptr++ = source[lupe][indicies[columnLupe]];
+        }
+    }
+
+    // http://www.netlib.org/lapack/lug/node80.html
+    // http://www.netlib.org/lapack/explore-html/d7/d3b/group__double_g_esolve_ga5ee879032a8365897c3ba91e3dc8d512.html#ga5ee879032a8365897c3ba91e3dc8d512
+    // http://www.netlib.org/lapack/explore-html/dd/d9a/group__double_g_ecomputational_ga188b8d30443d14b1a3f7f8331d87ae60.html#ga188b8d30443d14b1a3f7f8331d87ae60
+
+
+    /* *************************************************************************
+     * Routine to perform an LU decomposition on the current matrix in place.
+     * Calls the LAPACK dgetrf_ routine.
+     * ************************************************************************* */
+    int dgetrf()
+    {
+        // Set up the variables to pass to the LAPACK routine.
+        int numRows = this->rows;
+        int numCols = numRows;
+        int LDA = numRows;
+        int result;
+
+        // Call LAPACK's dgetrf_ routine.
+        dgetrf_(&numRows,&numCols,this->u[0],&LDA,this->index,&result);
+
+        // print out the row permutations to see what happened...
+        //std::cout << std::endl;
+        //for(int lupe=0;lupe<this->rows;++lupe)
+        //    std::cout << result << ":" << this->index[lupe] << std::endl;
+
+        // Clean up and return the result.
+        return(result);
+    }
+
+};
 
 #endif // VECTOR_H
