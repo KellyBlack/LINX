@@ -136,6 +136,7 @@ int main()
     C.copyColumnsToRows(A,indicies);
     C.printArray();
     //std::cout << "Result of LU Decomposition: " << C.dgetrf() << std::endl;
+    std::cout << "The norm of the matrix: " << C.dlange() << std::endl;
     std::cout << "The reciprocol of the condition number: " << C.dgecon(true) << std::endl;
     C.printArray();
     A.RREF();

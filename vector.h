@@ -13,6 +13,7 @@ extern "C" {
     //extern void dscal_(int*,double*,double*,int*);
     extern void dgetrf_(int*,int*,double*,int*,int*,int*);
     extern void dgecon_(char*,int*,double*,int*,double*,double*,double*,int*,int*);
+    extern double dlange_(char*,int*,int*,double*,int*,double*);
 }
 
 
@@ -452,11 +453,11 @@ public:
     void copyColumnsToRows(matrix<field>& source,vector<int>indicies)
     {
         field* ptr;
-        for(int columnLupe=0;columnLupe<indicies.getLength();++columnLupe)
+        for(int rowLupe=0;rowLupe<this->rows;++rowLupe)
         {
-            ptr = this->u[columnLupe];
-            for(int lupe=0;lupe<this->rows;++lupe)
-                *ptr++ = source[lupe][indicies[columnLupe]];
+            ptr = this->u[rowLupe];
+            for(int lupe=0;lupe<this->columns;++lupe)
+                *ptr++ = source[rowLupe][indicies[lupe]];
         }
     }
 
@@ -474,7 +475,7 @@ public:
         // Set up the variables to pass to the LAPACK routine.
         int numRows = this->rows;
         int numCols = numRows;
-        int LDA = numRows;
+        int LDA = numCols;
         int result;
 
         // Call LAPACK's dgetrf_ routine.
@@ -487,6 +488,27 @@ public:
 
         // Clean up and return the result.
         return(result);
+    }
+
+    /* *************************************************************************
+     * Routine to approximate the norm of the current matrix.
+     * Calls the LAPACK dlange_ routine.
+     * ************************************************************************* */
+    double dlange()
+    {
+        // Set up the parameters to send to the LAPACK method.
+        char *whichNorm = "1";
+        int numberRows = this->rows;
+        int numberCols = numberRows;
+        int LDA = numberRows;
+        double *work = new double[4*numberRows];
+
+        // Call the lapack routine to calc. the norm of the matrix.
+        double norm = dlange_(whichNorm,&numberRows,&numberCols,this->u[0],&LDA,work);
+
+        // Clean up and return the norm.
+        delete [] work;
+        return(norm);
     }
 
     /* *************************************************************************
