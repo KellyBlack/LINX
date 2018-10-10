@@ -70,9 +70,20 @@ bool columnsConsidered(matrix<double> *rref,
  * Routine to check a given set of columns and get the condition number for
  * the columns from the original matrix.
  * ******************************************************************************* */
-void testFullColumnSet(matrix<double> *rref, vector<int> *indicies)
+void testFullColumnSet(matrix<double> *rref,
+                       matrix<double> *originalStoichiometry,
+                       squareMatrix<double> *testBasis,
+                       int *numberFeasible,
+                       vector<int> *indicies)
 {
-    indicies->printVector();
+    testBasis->copyColumnsToRows(originalStoichiometry,indicies);
+    *numberFeasible += 1;
+    if(testBasis->dgetrf()==0)
+    {
+        indicies->printVector();
+        //*numberFeasible += 1;
+    }
+
 }
 
 /* *******************************************************************************
@@ -83,7 +94,12 @@ void testFullColumnSet(matrix<double> *rref, vector<int> *indicies)
  * column with a non-zero entry. For each of those entries it then calls the routine
  * to go through the next row and check each column for the next row. (Repeat!)
  * ******************************************************************************* */
-void checkColumns(matrix<double> *rref, vector<int> *indicies,int currentRow)
+void checkColumns(matrix<double> *rref,
+                  matrix<double> *originalStoichiometry,
+                  squareMatrix<double> *testBasis,
+                  vector<int> *indicies,
+                  int *numberFeasible,
+                  int currentRow)
 {
     // Go through each column for the current row. Check to see which entries are
     // non-zero....
@@ -103,13 +119,13 @@ void checkColumns(matrix<double> *rref, vector<int> *indicies,int currentRow)
             if( (currentRow+1) >= rref->getNumberRows())
             {
                 // We now have a full list of columns to check.
-                testFullColumnSet(rref,indicies);
+                testFullColumnSet(rref,originalStoichiometry,testBasis,numberFeasible,indicies);
             }
             else
             {
                 // We need at least one more column to check.
                 // search using the next row in the RREF matrix.
-                checkColumns(rref,indicies,currentRow+1);
+                checkColumns(rref,originalStoichiometry,testBasis,indicies,numberFeasible,currentRow+1);
             }
         }
     }
@@ -124,6 +140,8 @@ int main()
     squareMatrix<double> testBasis(stoichiometry.getNumberRows(),0.0);
     vector<int>    indicies(stoichiometry.getNumberRows(),-1);
 
+    int numberFeasible = 0;
+
     stoichiometry.printArray();
     originalStoich.printArray();
 
@@ -134,9 +152,9 @@ int main()
     indicies[3] = 4;
     indicies[4] = 5;
     indicies[5] = 11;
-    testBasis.copyColumnsToRows(stoichiometry,indicies);
+    testBasis.copyColumnsToRows(&stoichiometry,&indicies);
     testBasis.printArray();
-    //std::cout << "Result of LU Decomposition: " << C.dgetrf() << std::endl;
+    //std::cout << "Result of LU Decomposition: " << testBasis.dgetrf() << std::endl;
     */
 
     std::cout << "The norm of the matrix: " << testBasis.dlange() << std::endl;
@@ -144,7 +162,9 @@ int main()
     testBasis.printArray();
     stoichiometry.RREF();
     stoichiometry.printArray();
-    checkColumns(&stoichiometry,&indicies,0);
+    checkColumns(&stoichiometry,&originalStoich,&testBasis,&indicies,&numberFeasible,0);
+
+    std::cout << "Number Feasible: " << numberFeasible << std::endl;
     std::cout << "Done" << std::endl;
 
     return 0;

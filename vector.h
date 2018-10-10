@@ -467,14 +467,14 @@ public:
      * Routine to copy over the columns of a given matrix into the rows
      * of this matrix. The columns to copy are given in a vector of integers.
      * ************************************************************************* */
-    void copyColumnsToRows(matrix<field>& source,vector<int>indicies)
+    void copyColumnsToRows(matrix<field> *source,vector<int> *indicies)
     {
         field* ptr;
         for(int rowLupe=0;rowLupe<this->rows;++rowLupe)
         {
             ptr = this->u[rowLupe];
             for(int lupe=0;lupe<this->columns;++lupe)
-                *ptr++ = source[rowLupe][indicies[lupe]];
+                *ptr++ = (*source)[rowLupe][(*indicies)[lupe]];
         }
     }
 
