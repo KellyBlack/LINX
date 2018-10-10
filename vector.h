@@ -80,15 +80,15 @@ public:
     }
 
     // Constructor that takes the number rows, columns, and initial value.
-    matrix(int numRows,int numColumns,field initial=0)
+    matrix(int numRows,int numColumns,field initial)
     {
         rows    = numRows;
         columns = numColumns;
-        u = new field*[rows];
-        u[0] = new field[rows*columns];
+        createArray();
+
+        // initialize the values of the entries in the array.
         for(int rowLupe=0;rowLupe<rows;++rowLupe)
         {
-            u[rowLupe] = u[0] + rowLupe*columns;
             for(int columnLupe=0;columnLupe<columns;++columnLupe)
             {
                 u[rowLupe][columnLupe] = initial;
@@ -115,12 +115,7 @@ public:
                 int comma = inputLine.find(',');                                   // Figure out where the comma is.
                 rows    = std::stoi(inputLine.substr(0,comma));                    // Get the number of rows.
                 columns = std::stoi(inputLine.substr(comma+1,inputLine.length())); // Get the number of columns.
-
-                // Allocate the space used by the array.
-                u = new field*[rows];
-                u[0] = new field[rows*columns];
-                for(int rowLupe=0;rowLupe<rows;++rowLupe)
-                    u[rowLupe] = u[0] + rowLupe*columns;
+                createArray();
             }
             else
             {
@@ -149,12 +144,7 @@ public:
         // Set the number of rows and columns.
         rows = other.getNumberRows();
         columns = other.getNumberColumns();
-
-        // Allocate the space used by the array.
-        u = new field*[rows];
-        u[0] = new field[rows*columns];
-        for(int rowLupe=0;rowLupe<rows;++rowLupe)
-            u[rowLupe] = u[0] + rowLupe*columns;
+        createArray();
 
         // Finally copy everything over....
         for(int rowLupe=0;rowLupe<rows;++rowLupe)
@@ -164,6 +154,16 @@ public:
             }
 
         createIndexPermutation();
+    }
+
+    // routine to allocate and initialize the space for the array
+    void createArray()
+    {
+        // Allocate the space used by the array.
+        u = new field*[rows];
+        u[0] = new field[rows*columns];
+        for(int rowLupe=0;rowLupe<rows;++rowLupe)
+            u[rowLupe] = u[0] + rowLupe*columns;
     }
 
 
@@ -441,10 +441,27 @@ template <class field>
 class squareMatrix : public matrix<field>
 {
 public:
-    squareMatrix() : matrix<field>() {  }
+    squareMatrix() : matrix<field>()
+    {
+        work = NULL;
+    }
 
-    squareMatrix(int numberRows,field initialValue=0) : matrix<field>(numberRows,numberRows,initialValue) {}
+    squareMatrix(int numberRows,field initialValue=0) : matrix<field>(numberRows,numberRows,initialValue)
+    {
+        createWorkspace();
+    }
     //squareMatrix(matrix<field>& A) : matrix<field>(A){createIndexPermutation();}
+
+    ~squareMatrix()
+    {
+        delete [] work;
+    }
+
+    // method to allocate space for the workspace array
+    void createWorkspace()
+    {
+        work = new field[4*this->rows];
+    }
 
     /* *************************************************************************
      * Routine to copy over the columns of a given matrix into the rows
@@ -501,13 +518,11 @@ public:
         int numberRows = this->rows;
         int numberCols = numberRows;
         int LDA = numberRows;
-        double *work = new double[4*numberRows];
 
         // Call the lapack routine to calc. the norm of the matrix.
         double norm = dlange_(whichNorm,&numberRows,&numberCols,this->u[0],&LDA,work);
 
         // Clean up and return the norm.
-        delete [] work;
         return(norm);
     }
 
@@ -533,7 +548,6 @@ public:
         int LDA = numRows;
         double norm = 1.0;
         double cond;
-        double *work = new double[4*numRows];
         int *iwork   = new int[numRows];
         int result;
 
@@ -541,7 +555,6 @@ public:
         dgecon_(&which,&numRows,this->u[0],&LDA,&norm,&cond,work,iwork,&result);
 
         // clean up the mess.
-        delete [] work;
         delete [] iwork;
 
         // return the condition number.
@@ -551,6 +564,8 @@ public:
             return(0.0);
     }
 
+protected:
+    field *work;
 
 };
 
