@@ -119,29 +119,32 @@ int main()
 {
     std::cout << std::endl << std::endl << "Starting" << std::endl;
     vector<double> v(10,1.0);
-    matrix<double> A("oyster.txt");
-    matrix<double> B(A);
-    squareMatrix<double> C(A.getNumberRows(),0.0);
-    vector<int>    indicies(A.getNumberRows(),-1);
+    matrix<double> stoichiometry("oyster.txt");
+    matrix<double> originalStoich(stoichiometry);
+    squareMatrix<double> testBasis(stoichiometry.getNumberRows(),0.0);
+    vector<int>    indicies(stoichiometry.getNumberRows(),-1);
 
-    A.printArray();
-    B.printArray();
+    stoichiometry.printArray();
+    originalStoich.printArray();
 
+    /*
     indicies[0] = 0;
     indicies[1] = 1;
     indicies[2] = 3;
     indicies[3] = 4;
     indicies[4] = 5;
     indicies[5] = 11;
-    C.copyColumnsToRows(A,indicies);
-    C.printArray();
+    testBasis.copyColumnsToRows(stoichiometry,indicies);
+    testBasis.printArray();
     //std::cout << "Result of LU Decomposition: " << C.dgetrf() << std::endl;
-    std::cout << "The norm of the matrix: " << C.dlange() << std::endl;
-    std::cout << "The reciprocol of the condition number: " << C.dgecon(true) << std::endl;
-    C.printArray();
-    A.RREF();
-    A.printArray();
-    //checkColumns(&A,&indicies,0);
+    */
+
+    std::cout << "The norm of the matrix: " << testBasis.dlange() << std::endl;
+    std::cout << "The reciprocol of the condition number: " << testBasis.dgecon(true) << std::endl;
+    testBasis.printArray();
+    stoichiometry.RREF();
+    stoichiometry.printArray();
+    checkColumns(&stoichiometry,&indicies,0);
     std::cout << "Done" << std::endl;
 
     return 0;
