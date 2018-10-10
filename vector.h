@@ -12,8 +12,8 @@ extern "C" {
     //extern void daxpy_(int*,double*,double*,int*,double*,int*);
     //extern void dscal_(int*,double*,double*,int*);
     extern void dgetrf_(int*,int*,double*,int*,int*,int*);
-    extern void dgecon_(char*,int*,double*,int*,double*,double*,double*,int*,int*);
-    extern double dlange_(char*,int*,int*,double*,int*,double*);
+    extern void dgecon_(const char*,int*,double*,int*,double*,double*,double*,int*,int*);
+    extern double dlange_(const char*,int*,int*,double*,int*,double*);
 }
 
 
@@ -514,7 +514,7 @@ public:
     double dlange()
     {
         // Set up the parameters to send to the LAPACK method.
-        char *whichNorm = "1";
+        const char *whichNorm = "1";
         int numberRows = this->rows;
         int numberCols = numberRows;
         int LDA = numberRows;
@@ -543,7 +543,7 @@ public:
 
         // Determine the necessary parameters for the call to the routine
         // to estimate the condition number.
-        char which = '1';
+        const char which = '1';
         int numRows = this->rows;
         int LDA = numRows;
         double norm = 1.0;
