@@ -159,11 +159,12 @@ int main()
     testBasis.copyColumnsToRows(&stoichiometry,&indicies);
     testBasis.printArray();
     //std::cout << "Result of LU Decomposition: " << testBasis.dgetrf() << std::endl;
-    */
 
     std::cout << "The norm of the matrix: " << testBasis.dlange() << std::endl;
     std::cout << "The reciprocol of the condition number: " << testBasis.dgecon(true) << std::endl;
     testBasis.printArray();
+    */
+
     stoichiometry.RREF();
     stoichiometry.printArray();
     checkColumns(&stoichiometry,&originalStoich,&testBasis,&indicies,&numberFeasible,0);

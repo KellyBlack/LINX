@@ -117,20 +117,21 @@ public:
                 columns = std::stoi(inputLine.substr(comma+1,inputLine.length())); // Get the number of columns.
                 createArray();
             }
-            else
+            else if (inputLine.length()>0)
             {
                 // This is a row that has entries for the matrix.
                 // Assume it is comma separated numbers.
-                uint comma = inputLine.find(',');  // Figure out where the comma is.
+                std::size_t comma = inputLine.find(',');  // Figure out where the comma is.
                 int columnNumber = 0;
-                while((comma>=0) && (comma < inputLine.length()) && (inputLine.length()>0) )
+                while(comma != std::string::npos)
                 {
                     std::string number = inputLine.substr(0,comma);           // Get the next number
                     inputLine = inputLine.substr(comma+1,inputLine.length()); // Remove the next number from the line
                     u[lineNumber-2][columnNumber++] = std::stod(number);      // Save the number in the array
-                    comma = inputLine.find(',');                              // Figure out where the comma is.
+                    comma = inputLine.find(",");                              // Figure out where the comma is.
                 }
-
+                // Assume that everything at the end is a number.
+                u[lineNumber-2][columnNumber++] = std::stod(inputLine);
             }
         }
 
