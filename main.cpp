@@ -66,6 +66,8 @@ bool columnsConsidered(matrix<double> *rref,
 // http://www.netlib.org/lapack/lug/node80.html
 // http://www.netlib.org/lapack/explore-html/d7/d3b/group__double_g_esolve_ga5ee879032a8365897c3ba91e3dc8d512.html#ga5ee879032a8365897c3ba91e3dc8d512
 // http://www.netlib.org/lapack/explore-html/dd/d9a/group__double_g_ecomputational_ga188b8d30443d14b1a3f7f8331d87ae60.html#ga188b8d30443d14b1a3f7f8331d87ae60
+
+
 /* *******************************************************************************
  * Routine to check a given set of columns and get the condition number for
  * the columns from the original matrix.
@@ -76,12 +78,14 @@ void testFullColumnSet(matrix<double> *rref,
                        int *numberFeasible,
                        vector<int> *indicies)
 {
+    // form a matrix with the appropriate columns of the original stoichiometry matrix
     testBasis->copyColumnsToRows(originalStoichiometry,indicies);
-    *numberFeasible += 1;
     if(testBasis->dgetrf()==0)
     {
-        indicies->printVector();
-        //*numberFeasible += 1;
+        // The resulting system is of full rank.
+        // Figure out the necessary details.
+        //indicies->printVector();
+        *numberFeasible += 1;
     }
 
 }
@@ -103,13 +107,13 @@ void checkColumns(matrix<double> *rref,
 {
     // Go through each column for the current row. Check to see which entries are
     // non-zero....
-    int lupe;
-    for(lupe=0;lupe<rref->getNumberColumns();++lupe)
+    for(int lupe=0;lupe<rref->getNumberColumns();++lupe)
     {
         (*indicies)[currentRow] = lupe;
-        if((fabs((*rref)[currentRow][lupe])>1.0e-9) &&
-                (!columnExists(indicies,currentRow,lupe)) &&
-                (!columnsConsidered(rref,indicies,currentRow,lupe)))
+        if((fabs((*rref)[currentRow][lupe])>1.0e-9)
+                && (!columnExists(indicies,currentRow,lupe))
+                && (!columnsConsidered(rref,indicies,currentRow,lupe))
+                )
         {
             // This entry in the RREF matrix is non-zer0.
             // The column has also not been checked previously.
