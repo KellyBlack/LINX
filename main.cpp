@@ -72,6 +72,22 @@ bool columnsConsidered(matrix<double> *rref,
 
 
 /* *******************************************************************************
+ * Routine to check to see if a given set of columns has been previously checked.
+ * ******************************************************************************* */
+bool columnsPreviouslyChecked(vector<int> *indicies,
+                              std::list<FoundFeasible*> *checkedSets)
+{
+    bool alreadyChecked = false;
+    std::list<FoundFeasible*>::iterator prevChecked;
+    for(prevChecked=checkedSets->begin();!alreadyChecked && (prevChecked!=checkedSets->end());++prevChecked)
+    {
+        // go through each list in the set of previously checked columns. If there is a match then stop the show.
+        alreadyChecked = alreadyChecked || (*prevChecked)->match(indicies);
+    }
+    return(alreadyChecked);
+}
+
+/* *******************************************************************************
  * Routine to check a given set of columns and get the condition number for
  * the columns from the original matrix.
  * ******************************************************************************* */
@@ -91,17 +107,11 @@ void testFullColumnSet(matrix<double> *rref,
         // Figure out the necessary details.
         //indicies->printVector();
 
-        bool alreadyChecked = false;
-        std::list<FoundFeasible*>::iterator prevChecked;
-        for(prevChecked=checkedSets->begin();!alreadyChecked && (prevChecked!=checkedSets->end());++prevChecked)
-        {
-            alreadyChecked = alreadyChecked || (*prevChecked)->match(indicies);
-        }
 
-        if(alreadyChecked)
+        if(columnsPreviouslyChecked(indicies,checkedSets))
         {
             (*numberRepeats)++;
-            std::cout << "   Previously checked: " << *indicies << std::endl;
+            //std::cout << "   Previously checked: " << *indicies << std::endl;
             //exit(2);
         }
         else
