@@ -93,7 +93,7 @@ bool columnsPreviouslyChecked(Vector<int> *indicies,
  * ******************************************************************************* */
 void testFullColumnSet(Matrix<double> *rref,
                        Matrix<double> *originalStoichiometry,
-                       squareMatrix<double> *testBasis,
+                       SquareMatrix<double> *testBasis,
                        int *numberFeasible,
                        Vector<int> *indicies,
                        std::list<FoundFeasible*> *checkedSets,
@@ -139,7 +139,7 @@ void testFullColumnSet(Matrix<double> *rref,
  * ******************************************************************************* */
 void checkColumns(Matrix<double> *rref,
                   Matrix<double> *originalStoichiometry,
-                  squareMatrix<double> *testBasis,
+                  SquareMatrix<double> *testBasis,
                   Vector<int> *indicies,
                   int *numberFeasible,
                   int currentRow,
@@ -188,7 +188,7 @@ int main(int argc,char **argv)
     Vector<double>       v(10,1.0);
     Matrix<double>       stoichiometry(argv[1]);
     Matrix<double>       originalStoich(stoichiometry);
-    squareMatrix<double> testBasis(stoichiometry.getNumberRows(),0.0);
+    SquareMatrix<double> testBasis(stoichiometry.getNumberRows(),0.0);
     Vector<int>          indicies(stoichiometry.getNumberRows(),-1);
 
     int numberFeasible = 0;

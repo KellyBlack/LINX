@@ -448,21 +448,21 @@ protected:
 
 
 template <class field>
-class squareMatrix : public Matrix<field>
+class SquareMatrix : public Matrix<field>
 {
 public:
-    squareMatrix() : Matrix<field>()
+    SquareMatrix() : Matrix<field>()
     {
         work = NULL;
     }
 
-    squareMatrix(int numberRows,field initialValue=0) : Matrix<field>(numberRows,numberRows,initialValue)
+    SquareMatrix(int numberRows,field initialValue=0) : Matrix<field>(numberRows,numberRows,initialValue)
     {
         createWorkspace();
     }
     //squareMatrix(matrix<field>& A) : matrix<field>(A){createIndexPermutation();}
 
-    ~squareMatrix()
+    ~SquareMatrix()
     {
         delete [] work;
     }
