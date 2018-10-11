@@ -1,12 +1,16 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <list>
 
 #include "vector.h"
+#include "foundfeasible.h"
 
 //using namespace std;
+#define DEBUG
 
-
+std::list<FoundFeasible*> checkedSets;
+int numberRepeats = 0;
 
 
 
@@ -34,14 +38,16 @@ bool columnsConsidered(matrix<double> *rref,
 {
 
     bool considered = false;
+    return(false);
 
     //std::cout << "checking: " << (*indicies)[currentRow] << "/" << currentRow << "/" << currentColumn << " " << std::endl;
     //printVector(*indicies);
-    for(int lupe=0;!considered && (lupe<(currentRow-1));++lupe)
+    for(int prevColumn=0;!considered && (prevColumn<currentRow);++prevColumn)
     {
-        if((*indicies)[lupe]>(*indicies)[currentRow])
+        if((*indicies)[prevColumn]>(*indicies)[currentRow])
         {
-            for(int rowCheck=0;!considered && (rowCheck<(currentRow-1));++rowCheck)
+            // This column may have been considered in a previous iteration.
+            for(int rowCheck=0;!considered && (rowCheck<indicies->getLength());++rowCheck)
             {
                 /*
                 std::cout << std::setw(5) << (*rref)[rowCheck][(*indicies)[rowCheck]]
@@ -49,12 +55,13 @@ bool columnsConsidered(matrix<double> *rref,
                           << std::setw(5) << (*rref)[rowCheck][currentColumn]
                           << std::setw(5) << (*rref)[currentRow][currentColumn]
                                << std::endl;
-                               */
-                 considered = considered ||
-                         (fabs((*rref)[rowCheck][(*indicies)[rowCheck]] *
-                            (*rref)[currentRow][(*indicies)[rowCheck]] *
-                            (*rref)[rowCheck][currentColumn] *
-                            (*rref)[currentRow][currentColumn]) > 1e-4 );
+                */
+                if(rowCheck!=prevColumn)
+                     considered = considered ||
+                             (fabs((*rref)[prevColumn][(*indicies)[prevColumn]] *
+                                (*rref)[prevColumn][currentColumn] *
+                                (*rref)[rowCheck][(*indicies)[prevColumn]] *
+                                (*rref)[rowCheck][currentColumn]) > 1e-4 );
             }
         }
     }
@@ -85,7 +92,31 @@ void testFullColumnSet(matrix<double> *rref,
         // The resulting system is of full rank.
         // Figure out the necessary details.
         //indicies->printVector();
-        *numberFeasible += 1;
+
+        bool alreadyChecked = false;
+        std::list<FoundFeasible*>::iterator prevChecked;
+        for(prevChecked=checkedSets.begin();!alreadyChecked && (prevChecked!=checkedSets.end());++prevChecked)
+        {
+            alreadyChecked = alreadyChecked || (*prevChecked)->match(indicies);
+        }
+
+        if(alreadyChecked)
+        {
+            numberRepeats++;
+            std::cout << "   Previously checked: " << *indicies << std::endl;
+            //exit(2);
+        }
+        else
+            *numberFeasible += 1;
+
+        FoundFeasible *newColumns = new FoundFeasible;
+        newColumns->clearList();
+        for(int foundLupe=0;foundLupe<indicies->getLength();++foundLupe)
+        {
+            newColumns->addColumn((*indicies)[foundLupe]);
+        }
+        checkedSets.push_back(newColumns);
+
     }
 
 }
@@ -138,11 +169,11 @@ void checkColumns(matrix<double> *rref,
 int main()
 {
     std::cout << std::endl << std::endl << "Starting" << std::endl;
-    vector<double> v(10,1.0);
-    matrix<double> stoichiometry("oyster.txt");
-    matrix<double> originalStoich(stoichiometry);
+    vector<double>       v(10,1.0);
+    matrix<double>       stoichiometry("oyster.txt");
+    matrix<double>       originalStoich(stoichiometry);
     squareMatrix<double> testBasis(stoichiometry.getNumberRows(),0.0);
-    vector<int>    indicies(stoichiometry.getNumberRows(),-1);
+    vector<int>          indicies(stoichiometry.getNumberRows(),-1);
 
     int numberFeasible = 0;
 
@@ -171,6 +202,10 @@ int main()
 
     std::cout << "Number Feasible: " << numberFeasible << std::endl;
     std::cout << "Done" << std::endl;
+
+#ifdef DEBUG
+    std::cout << "Number of repeats: " << numberRepeats << std::endl;
+#endif
 
     return 0;
 }

@@ -1,6 +1,7 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <ostream>
 #include <iostream>
 #include <fstream>
 #include <math.h>
@@ -44,6 +45,14 @@ public:
     field operator [] (int which) const
     {
         return(u[which]);
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, vector& v)
+    {
+        os << v[0];
+        for(int lupe=1;lupe<v.getLength();++lupe)
+            os << "," << v[lupe];
+        return(os);
     }
 
     explicit operator field*() {return u;}

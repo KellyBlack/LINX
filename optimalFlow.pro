@@ -4,9 +4,11 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        main.cpp
+        main.cpp \
+    foundfeasible.cpp
 
 HEADERS += \
-    vector.h
+    vector.h \
+    foundfeasible.h
 
 unix:!macx: LIBS += -lblas -llapack
