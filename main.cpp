@@ -9,10 +9,6 @@
 //using namespace std;
 #define DEBUG
 
-std::list<FoundFeasible*> checkedSets;
-int numberRepeats = 0;
-
-
 
 // Routine to see if a given column is already listed in the
 // vector of indicies to check.
@@ -83,7 +79,9 @@ void testFullColumnSet(matrix<double> *rref,
                        matrix<double> *originalStoichiometry,
                        squareMatrix<double> *testBasis,
                        int *numberFeasible,
-                       vector<int> *indicies)
+                       vector<int> *indicies,
+                       std::list<FoundFeasible*> *checkedSets,
+                       int *numberRepeats)
 {
     // form a matrix with the appropriate columns of the original stoichiometry matrix
     testBasis->copyColumnsToRows(originalStoichiometry,indicies);
@@ -95,14 +93,14 @@ void testFullColumnSet(matrix<double> *rref,
 
         bool alreadyChecked = false;
         std::list<FoundFeasible*>::iterator prevChecked;
-        for(prevChecked=checkedSets.begin();!alreadyChecked && (prevChecked!=checkedSets.end());++prevChecked)
+        for(prevChecked=checkedSets->begin();!alreadyChecked && (prevChecked!=checkedSets->end());++prevChecked)
         {
             alreadyChecked = alreadyChecked || (*prevChecked)->match(indicies);
         }
 
         if(alreadyChecked)
         {
-            numberRepeats++;
+            (*numberRepeats)++;
             std::cout << "   Previously checked: " << *indicies << std::endl;
             //exit(2);
         }
@@ -115,7 +113,7 @@ void testFullColumnSet(matrix<double> *rref,
         {
             newColumns->addColumn((*indicies)[foundLupe]);
         }
-        checkedSets.push_back(newColumns);
+        checkedSets->push_back(newColumns);
 
     }
 
@@ -134,7 +132,10 @@ void checkColumns(matrix<double> *rref,
                   squareMatrix<double> *testBasis,
                   vector<int> *indicies,
                   int *numberFeasible,
-                  int currentRow)
+                  int currentRow,
+                  std::list<FoundFeasible*> *checkedSets,
+                  int *numberRepeats
+                  )
 {
     // Go through each column for the current row. Check to see which entries are
     // non-zero....
@@ -154,13 +155,13 @@ void checkColumns(matrix<double> *rref,
             if( (currentRow+1) >= rref->getNumberRows())
             {
                 // We now have a full list of columns to check.
-                testFullColumnSet(rref,originalStoichiometry,testBasis,numberFeasible,indicies);
+                testFullColumnSet(rref,originalStoichiometry,testBasis,numberFeasible,indicies,checkedSets,numberRepeats);
             }
             else
             {
                 // We need at least one more column to check.
                 // search using the next row in the RREF matrix.
-                checkColumns(rref,originalStoichiometry,testBasis,indicies,numberFeasible,currentRow+1);
+                checkColumns(rref,originalStoichiometry,testBasis,indicies,numberFeasible,currentRow+1,checkedSets,numberRepeats);
             }
         }
     }
@@ -176,6 +177,10 @@ int main()
     vector<int>          indicies(stoichiometry.getNumberRows(),-1);
 
     int numberFeasible = 0;
+
+    std::list<FoundFeasible*> checkedSets;
+    int numberRepeats = 0;
+
 
     stoichiometry.printArray();
     originalStoich.printArray();
@@ -198,7 +203,7 @@ int main()
 
     stoichiometry.RREF();
     stoichiometry.printArray();
-    checkColumns(&stoichiometry,&originalStoich,&testBasis,&indicies,&numberFeasible,0);
+    checkColumns(&stoichiometry,&originalStoich,&testBasis,&indicies,&numberFeasible,0,&checkedSets,&numberRepeats);
 
     std::cout << "Number Feasible: " << numberFeasible << std::endl;
     std::cout << "Done" << std::endl;
