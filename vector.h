@@ -19,10 +19,10 @@ extern "C" {
 
 
 template <class field>
-class vector
+class Vector
 {
 public:
-    vector(int number,field initial=0)
+    Vector(int number,field initial=0)
     {
         u = new field[number];
         length = number;
@@ -32,7 +32,7 @@ public:
         }
     }
 
-    ~vector()
+    ~Vector()
     {
       delete [] u;
     }
@@ -47,7 +47,7 @@ public:
         return(u[which]);
     }
 
-    friend std::ostream& operator<<(std::ostream& os, vector& v)
+    friend std::ostream& operator<<(std::ostream& os, Vector& v)
     {
         os << v[0];
         for(int lupe=1;lupe<v.getLength();++lupe)
@@ -76,11 +76,11 @@ private:
 
 
 template <class field>
-class matrix
+class Matrix
 {
 public:
     // Default constructor
-    matrix()
+    Matrix()
     {
         u = NULL;
         rows = -1;
@@ -89,7 +89,7 @@ public:
     }
 
     // Constructor that takes the number rows, columns, and initial value.
-    matrix(int numRows,int numColumns,field initial)
+    Matrix(int numRows,int numColumns,field initial)
     {
         rows    = numRows;
         columns = numColumns;
@@ -108,7 +108,7 @@ public:
 
     // Constructor that takes the name of a file and reads the
     // matrix from the file.
-    matrix(std::string fileName)
+    Matrix(std::string fileName)
     {
         std::ifstream fp(fileName); // Open a file to read.
         std::string inputLine;
@@ -149,7 +149,7 @@ public:
     }
 
     // Constructor based on a passing another instance of a matrix.
-    matrix(matrix<field>& other)
+    Matrix(Matrix<field>& other)
     {
         // Set the number of rows and columns.
         rows = other.getNumberRows();
@@ -188,7 +188,7 @@ public:
     }
 
     // Destructor that deletes the memory allocated in the vector u.
-    ~matrix()
+    ~Matrix()
     {
         delete u[0];
         delete [] u;
@@ -220,7 +220,7 @@ public:
     }
 
     // Routine used for assignment
-    matrix& operator= (matrix<field>& other)
+    Matrix& operator= (Matrix<field>& other)
     {
         if(this != &other)
         {
@@ -448,15 +448,15 @@ protected:
 
 
 template <class field>
-class squareMatrix : public matrix<field>
+class squareMatrix : public Matrix<field>
 {
 public:
-    squareMatrix() : matrix<field>()
+    squareMatrix() : Matrix<field>()
     {
         work = NULL;
     }
 
-    squareMatrix(int numberRows,field initialValue=0) : matrix<field>(numberRows,numberRows,initialValue)
+    squareMatrix(int numberRows,field initialValue=0) : Matrix<field>(numberRows,numberRows,initialValue)
     {
         createWorkspace();
     }
@@ -477,7 +477,7 @@ public:
      * Routine to copy over the columns of a given matrix into the rows
      * of this matrix. The columns to copy are given in a vector of integers.
      * ************************************************************************* */
-    void copyColumnsToRows(matrix<field> *source,vector<int> *indicies)
+    void copyColumnsToRows(Matrix<field> *source,Vector<int> *indicies)
     {
         field* ptr;
         for(int rowLupe=0;rowLupe<this->rows;++rowLupe)

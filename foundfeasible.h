@@ -14,7 +14,7 @@ public:
     void clearList();
     void printList();
     void addColumn(int value);
-    bool match(vector<int> *indicies);
+    bool match(Vector<int> *indicies);
 
 private:
     std::list<int> columns;

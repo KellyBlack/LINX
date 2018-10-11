@@ -12,7 +12,7 @@
 
 // Routine to see if a given column is already listed in the
 // vector of indicies to check.
-bool columnExists(vector<int> *indicies,int currentRow,int value)
+bool columnExists(Vector<int> *indicies,int currentRow,int value)
 {
     // Go through all of the previous entries in the vector.
     for(int lupe=0;lupe<currentRow;++lupe)
@@ -27,8 +27,8 @@ bool columnExists(vector<int> *indicies,int currentRow,int value)
 // The idea is that if the coresponding entries in the RREF are non-zero, and
 // the column numbers are in descending order, then the set has already been
 // considered.
-bool columnsConsidered(matrix<double> *rref,
-                       vector<int> *indicies,
+bool columnsConsidered(Matrix<double> *rref,
+                       Vector<int> *indicies,
                        int currentRow,
                        int currentColumn)
 {
@@ -74,7 +74,7 @@ bool columnsConsidered(matrix<double> *rref,
 /* *******************************************************************************
  * Routine to check to see if a given set of columns has been previously checked.
  * ******************************************************************************* */
-bool columnsPreviouslyChecked(vector<int> *indicies,
+bool columnsPreviouslyChecked(Vector<int> *indicies,
                               std::list<FoundFeasible*> *checkedSets)
 {
     bool alreadyChecked = false;
@@ -91,11 +91,11 @@ bool columnsPreviouslyChecked(vector<int> *indicies,
  * Routine to check a given set of columns and get the condition number for
  * the columns from the original matrix.
  * ******************************************************************************* */
-void testFullColumnSet(matrix<double> *rref,
-                       matrix<double> *originalStoichiometry,
+void testFullColumnSet(Matrix<double> *rref,
+                       Matrix<double> *originalStoichiometry,
                        squareMatrix<double> *testBasis,
                        int *numberFeasible,
-                       vector<int> *indicies,
+                       Vector<int> *indicies,
                        std::list<FoundFeasible*> *checkedSets,
                        int *numberRepeats)
 {
@@ -137,10 +137,10 @@ void testFullColumnSet(matrix<double> *rref,
  * column with a non-zero entry. For each of those entries it then calls the routine
  * to go through the next row and check each column for the next row. (Repeat!)
  * ******************************************************************************* */
-void checkColumns(matrix<double> *rref,
-                  matrix<double> *originalStoichiometry,
+void checkColumns(Matrix<double> *rref,
+                  Matrix<double> *originalStoichiometry,
                   squareMatrix<double> *testBasis,
-                  vector<int> *indicies,
+                  Vector<int> *indicies,
                   int *numberFeasible,
                   int currentRow,
                   std::list<FoundFeasible*> *checkedSets,
@@ -177,23 +177,25 @@ void checkColumns(matrix<double> *rref,
     }
 }
 
-int main()
+int main(int argc,char **argv)
 {
-    std::cout << std::endl << std::endl << "Starting" << std::endl;
-    vector<double>       v(10,1.0);
-    matrix<double>       stoichiometry("oyster.txt");
-    matrix<double>       originalStoich(stoichiometry);
+    if(argc < 2)
+    {
+        std::cout << "Error - Command line should include name of file that has the stoichiometry matrix: \"" << argv[0] << " stoich.txt.\"" << std::endl << std::endl;
+        exit(1);
+    }
+    std::cout << argv[1] << std::endl << std::endl << "Starting" << std::endl;
+    Vector<double>       v(10,1.0);
+    Matrix<double>       stoichiometry(argv[1]);
+    Matrix<double>       originalStoich(stoichiometry);
     squareMatrix<double> testBasis(stoichiometry.getNumberRows(),0.0);
-    vector<int>          indicies(stoichiometry.getNumberRows(),-1);
+    Vector<int>          indicies(stoichiometry.getNumberRows(),-1);
 
     int numberFeasible = 0;
 
     std::list<FoundFeasible*> checkedSets;
     int numberRepeats = 0;
 
-
-    stoichiometry.printArray();
-    originalStoich.printArray();
 
     /*
     indicies[0] = 0;
@@ -211,6 +213,7 @@ int main()
     testBasis.printArray();
     */
 
+    stoichiometry.printArray();
     stoichiometry.RREF();
     stoichiometry.printArray();
     checkColumns(&stoichiometry,&originalStoich,&testBasis,&indicies,&numberFeasible,0,&checkedSets,&numberRepeats);
