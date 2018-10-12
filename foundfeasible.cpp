@@ -71,3 +71,16 @@ bool FoundFeasible::match(Vector<int> *indicies)
     //std::cout << " match: " << found << std::endl;
     return(found);
 }
+
+int FoundFeasible::length()
+{
+    return((int)columns.size());
+}
+
+std::list<int>::iterator FoundFeasible::begin(){return(columns.begin());}
+std::list<int>::iterator FoundFeasible::end(){return(columns.end());}
+void FoundFeasible::startIteration(){currentPos=begin();}
+void FoundFeasible::next(){++currentPos;}
+bool FoundFeasible::iterationDone(){return(currentPos!=end());}
+int FoundFeasible::currentValue(){return(*currentPos);}
+
