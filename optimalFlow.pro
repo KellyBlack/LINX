@@ -5,10 +5,12 @@ CONFIG -= qt
 
 SOURCES += \
         main.cpp \
-    foundfeasible.cpp
+    foundfeasible.cpp \
+    checkedcolumnstree.cpp
 
 HEADERS += \
     vector.h \
-    foundfeasible.h
+    foundfeasible.h \
+    checkedcolumnstree.h
 
 unix:!macx: LIBS += -lblas -llapack

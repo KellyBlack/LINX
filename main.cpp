@@ -5,10 +5,12 @@
 
 #include "vector.h"
 #include "foundfeasible.h"
+#include "checkedcolumnstree.h"
 
 //using namespace std;
 //#define DEBUG
 
+CheckedColumnsTree   *previouslyChecked;
 
 // Routine to see if a given column is already listed in the
 // vector of indicies to check.
@@ -107,8 +109,22 @@ void testFullColumnSet(Matrix<double> *rref,
         // Figure out the necessary details.
         //indicies->printVector();
 
-        if(columnsPreviouslyChecked(indicies,checkedSets))
+        // create the list of columns and keep them in a useable form.
+        FoundFeasible *newColumns = new FoundFeasible;
+        newColumns->clearList();
+        for(int foundLupe=0;foundLupe<indicies->getLength();++foundLupe)
         {
+            newColumns->addColumn((*indicies)[foundLupe]);
+        }
+
+
+        //if(previouslyChecked->checkColumn(newColumns))
+        //    std::cout << "Previous" << std::endl;
+
+        if(previouslyChecked->checkColumn(newColumns))
+        //if(columnsPreviouslyChecked(indicies,checkedSets))
+        {
+            delete newColumns;
             (*numberRepeats)++;
             //std::cout << "   Previously checked: " << *indicies << std::endl;
             //exit(2);
@@ -116,12 +132,6 @@ void testFullColumnSet(Matrix<double> *rref,
         else
         {
             // Add this vector to the list of columns examined.
-            FoundFeasible *newColumns = new FoundFeasible;
-            newColumns->clearList();
-            for(int foundLupe=0;foundLupe<indicies->getLength();++foundLupe)
-            {
-                newColumns->addColumn((*indicies)[foundLupe]);
-            }
             checkedSets->push_back(newColumns);
 
             *numberFeasible += 1;    // increment the number of feasible sets.
@@ -220,6 +230,7 @@ int main(int argc,char **argv)
     SquareMatrix<double> testBasis(stoichiometry.getNumberRows(),0.0);
     Vector<int>          indicies(stoichiometry.getNumberRows(),-1);
     Vector<int>          feasibleByColumn(stoichiometry.getNumberColumns(),0);
+    previouslyChecked = new CheckedColumnsTree(stoichiometry.getNumberColumns(),stoichiometry.getNumberRows());
 
     int numberFeasible = 0;
 
