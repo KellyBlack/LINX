@@ -51,7 +51,7 @@ std::ostream& operator<<(std::ostream& os, FoundFeasible& v)
 bool FoundFeasible::match(Vector<int> *indicies)
 {
     // See if the two lists have the same length.
-    bool found = indicies->getLength() == columns.size();
+    bool found = (std::size_t)indicies->getLength() == columns.size();
     //std::cout << "   Checking " << *indicies << " comparing to me " << *this << "   initial check: " << found << std::endl;
 
     std::list<int>::iterator listValues;

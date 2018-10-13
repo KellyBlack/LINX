@@ -10,8 +10,6 @@
 //using namespace std;
 //#define DEBUG
 
-CheckedColumnsTree   *previouslyChecked;
-
 // Routine to see if a given column is already listed in the
 // vector of indicies to check.
 bool columnExists(Vector<int> *indicies,int currentRow,int value)
@@ -92,58 +90,56 @@ bool columnsPreviouslyChecked(Vector<int> *indicies,
  * Routine to check a given set of columns and get the condition number for
  * the columns from the original matrix.
  * ******************************************************************************* */
-void testFullColumnSet(Matrix<double> *rref,
-                       Matrix<double> *originalStoichiometry,
+bool testFullColumnSet(Matrix<double> *originalStoichiometry,
                        SquareMatrix<double> *testBasis,
                        int *numberFeasible,
                        Vector<int> *feasibleByColumn,
                        Vector<int> *indicies,
-                       std::list<FoundFeasible*> *checkedSets,
-                       int *numberRepeats)
+                       int *numberRepeats,
+                       CheckedColumnsTree   *previouslyChecked)
 {
     // form a matrix with the appropriate columns of the original stoichiometry matrix
-    testBasis->copyColumnsToRows(originalStoichiometry,indicies);
+    // create the list of columns and keep them in a useable form.
+    // First record the current combination.
+    FoundFeasible newColumns;
+    newColumns.clearList();
+    for(int foundLupe=0;foundLupe<indicies->getLength();++foundLupe)
+    {
+        newColumns.addColumn((*indicies)[foundLupe]);
+    }
+
+    // See if this combination has been previously checked.
+    if(previouslyChecked->checkColumn(&newColumns))
+    {
+        // We have seen this before. Time to go....
+        (*numberRepeats)++;
+        return(false);
+    }
+
+    // see if the vectors have full rank.
+    testBasis->copyColumnsToRows(originalStoichiometry,indicies); // copy the columns in question to a separate matrix.
+    SquareMatrix<double> originalCopy(*testBasis);                // make a copy for determining the norm of the matrix later.
     if(testBasis->dgetrf()==0)
     {
         // The resulting system is of full rank.
         // Figure out the necessary details.
-        //indicies->printVector();
+        // First get the matrix norm.
+        double matrixNorm  = originalCopy.dlange();
+        double inverseNorm = testBasis->dgecon(false);
+        //std::cout << *numberFeasible << " " << matrixNorm << "/" << inverseNorm << std::endl;
 
-        // create the list of columns and keep them in a useable form.
-        FoundFeasible *newColumns = new FoundFeasible;
-        newColumns->clearList();
-        for(int foundLupe=0;foundLupe<indicies->getLength();++foundLupe)
+        //else
         {
-            newColumns->addColumn((*indicies)[foundLupe]);
-        }
-
-
-        //if(previouslyChecked->checkColumn(newColumns))
-        //    std::cout << "Previous" << std::endl;
-
-        if(previouslyChecked->checkColumn(newColumns))
-        //if(columnsPreviouslyChecked(indicies,checkedSets))
-        {
-            delete newColumns;
-            (*numberRepeats)++;
-            //std::cout << "   Previously checked: " << *indicies << std::endl;
-            //exit(2);
-        }
-        else
-        {
-            // Add this vector to the list of columns examined.
-            checkedSets->push_back(newColumns);
-
             *numberFeasible += 1;    // increment the number of feasible sets.
 
             // Now increment the values of the feasible columns for each column not
             // given in the current list of indices. Takes advantage that the
             // newColumns variable is sorted as the items were added above.
             int lupe=0;
-            for(newColumns->startIteration();newColumns->iterationDone();newColumns->next())
+            for(newColumns.startIteration();newColumns.iterationDone();newColumns.next())
             {
                 // go through each column in the current list.
-                while((lupe<feasibleByColumn->getLength())&&(lupe<newColumns->currentValue()))
+                while((lupe<feasibleByColumn->getLength())&&(lupe<newColumns.currentValue()))
                 {
                     // The column number to test is less than the current column number in the list
                     // of columns used to invert the matrix above.
@@ -163,6 +159,7 @@ void testFullColumnSet(Matrix<double> *rref,
         }
     }
 
+    return(true);
 }
 
 /* *******************************************************************************
@@ -179,9 +176,9 @@ void checkColumns(Matrix<double> *rref,
                   Vector<int> *indicies,
                   int *numberFeasible,
                   int currentRow,
-                  std::list<FoundFeasible*> *checkedSets,
                   int *numberRepeats,
-                  Vector<int> *feasibleByColumn
+                  Vector<int> *feasibleByColumn,
+                  CheckedColumnsTree   *previouslyChecked
                   )
 {
     // Go through each column for the current row. Check to see which entries are
@@ -202,16 +199,17 @@ void checkColumns(Matrix<double> *rref,
             if( (currentRow+1) >= rref->getNumberRows())
             {
                 // We now have a full list of columns to check.
-                testFullColumnSet(rref,originalStoichiometry,testBasis,
+                testFullColumnSet(originalStoichiometry,testBasis,
                                   numberFeasible,feasibleByColumn,
-                                  indicies,checkedSets,numberRepeats);
+                                  indicies,numberRepeats,previouslyChecked);
             }
             else
             {
                 // We need at least one more column to check.
                 // search using the next row in the RREF matrix.
                 checkColumns(rref,originalStoichiometry,testBasis,indicies,
-                             numberFeasible,currentRow+1,checkedSets,numberRepeats,feasibleByColumn);
+                             numberFeasible,currentRow+1,numberRepeats,
+                             feasibleByColumn,previouslyChecked);
             }
         }
     }
@@ -225,16 +223,15 @@ int main(int argc,char **argv)
         exit(1);
     }
     std::cout << argv[1] << std::endl << std::endl << "Starting" << std::endl;
+
     Matrix<double>       stoichiometry(argv[1]);
     Matrix<double>       originalStoich(stoichiometry);
     SquareMatrix<double> testBasis(stoichiometry.getNumberRows(),0.0);
     Vector<int>          indicies(stoichiometry.getNumberRows(),-1);
     Vector<int>          feasibleByColumn(stoichiometry.getNumberColumns(),0);
-    previouslyChecked = new CheckedColumnsTree(stoichiometry.getNumberColumns(),stoichiometry.getNumberRows());
+    CheckedColumnsTree   *previouslyChecked = new CheckedColumnsTree(stoichiometry.getNumberColumns(),stoichiometry.getNumberRows());
 
     int numberFeasible = 0;
-
-    std::list<FoundFeasible*> checkedSets;
     int numberRepeats = 0;
 
 
@@ -258,8 +255,9 @@ int main(int argc,char **argv)
     stoichiometry.RREF();
     stoichiometry.printArray();
     checkColumns(&stoichiometry,&originalStoich,&testBasis,&indicies,
-                 &numberFeasible,0,&checkedSets,&numberRepeats,
-                 &feasibleByColumn);
+                 &numberFeasible,0,&numberRepeats,
+                 &feasibleByColumn,
+                 previouslyChecked);
 
     std::cout << "Number Feasible: " << numberFeasible << std::endl << "Feasible by column: " << std::endl;
     feasibleByColumn.printVector();

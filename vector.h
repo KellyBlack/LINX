@@ -455,23 +455,34 @@ public:
     SquareMatrix() : Matrix<field>()
     {
         work = NULL;
+        iwork = NULL;
     }
 
     SquareMatrix(int numberRows,field initialValue=0) : Matrix<field>(numberRows,numberRows,initialValue)
     {
         createWorkspace();
     }
-    //squareMatrix(matrix<field>& A) : matrix<field>(A){createIndexPermutation();}
+
+    SquareMatrix(SquareMatrix<field>& A) : Matrix<field>(A)
+    {
+        //createIndexPermutation();
+        createWorkspace();
+    }
 
     ~SquareMatrix()
     {
-        delete [] work;
+        // clean up the mess.
+        if(work!=NULL)
+            delete [] work;
+        if(iwork!=NULL)
+            delete [] iwork;
     }
 
     // method to allocate space for the workspace array
     void createWorkspace()
     {
-        work = new field[4*this->rows];
+        work = new field[5*this->rows];
+        iwork   = new int[2*this->rows];
     }
 
     /* *************************************************************************
@@ -558,15 +569,11 @@ public:
         int numRows = this->rows;
         int LDA = numRows;
         double norm = 1.0;
-        double cond;
-        int *iwork   = new int[numRows];
-        int result;
+        double cond = 0.0;
+        int result = 0;
 
         // Call dgecon to get the condition number.
         dgecon_(&which,&numRows,this->u[0],&LDA,&norm,&cond,work,iwork,&result);
-
-        // clean up the mess.
-        delete [] iwork;
 
         // return the condition number.
         if(result==0)
@@ -577,7 +584,7 @@ public:
 
 protected:
     field *work;
-
+    int *iwork;
 };
 
 #endif // VECTOR_H
