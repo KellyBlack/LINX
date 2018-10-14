@@ -94,6 +94,7 @@ bool testFullColumnSet(Matrix<double> *originalStoichiometry,
                        SquareMatrix<double> *testBasis,
                        int *numberFeasible,
                        Vector<int> *feasibleByColumn,
+                       std::list<double> *conditionNumbers,
                        Vector<int> *indicies,
                        int *numberRepeats,
                        CheckedColumnsTree   *previouslyChecked)
@@ -126,6 +127,8 @@ bool testFullColumnSet(Matrix<double> *originalStoichiometry,
         // First get the matrix norm.
         double matrixNorm  = originalCopy.dlange();
         double inverseNorm = testBasis->dgecon(false);
+        double conditionNumber  = matrixNorm*inverseNorm;
+        conditionNumbers->push_back(conditionNumber);
         //std::cout << *numberFeasible << " " << matrixNorm << "/" << inverseNorm << std::endl;
 
         //else
@@ -178,6 +181,7 @@ void checkColumns(Matrix<double> *rref,
                   int currentRow,
                   int *numberRepeats,
                   Vector<int> *feasibleByColumn,
+                  std::list<double> *conditionNumbers,
                   CheckedColumnsTree   *previouslyChecked
                   )
 {
@@ -200,7 +204,7 @@ void checkColumns(Matrix<double> *rref,
             {
                 // We now have a full list of columns to check.
                 testFullColumnSet(originalStoichiometry,testBasis,
-                                  numberFeasible,feasibleByColumn,
+                                  numberFeasible,feasibleByColumn,conditionNumbers,
                                   indicies,numberRepeats,previouslyChecked);
             }
             else
@@ -209,7 +213,7 @@ void checkColumns(Matrix<double> *rref,
                 // search using the next row in the RREF matrix.
                 checkColumns(rref,originalStoichiometry,testBasis,indicies,
                              numberFeasible,currentRow+1,numberRepeats,
-                             feasibleByColumn,previouslyChecked);
+                             feasibleByColumn,conditionNumbers,previouslyChecked);
             }
         }
     }
@@ -230,6 +234,7 @@ int main(int argc,char **argv)
     Vector<int>          indicies(stoichiometry.getNumberRows(),-1);
     Vector<int>          feasibleByColumn(stoichiometry.getNumberColumns(),0);
     CheckedColumnsTree   *previouslyChecked = new CheckedColumnsTree(stoichiometry.getNumberColumns(),stoichiometry.getNumberRows());
+    std::list<double>    conditionNumbers;
 
     int numberFeasible = 0;
     int numberRepeats = 0;
@@ -256,7 +261,7 @@ int main(int argc,char **argv)
     stoichiometry.printArray();
     checkColumns(&stoichiometry,&originalStoich,&testBasis,&indicies,
                  &numberFeasible,0,&numberRepeats,
-                 &feasibleByColumn,
+                 &feasibleByColumn,&conditionNumbers,
                  previouslyChecked);
 
     std::cout << "Number Feasible: " << numberFeasible << std::endl << "Feasible by column: " << std::endl;
