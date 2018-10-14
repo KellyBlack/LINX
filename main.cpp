@@ -1,3 +1,38 @@
+/* ************************************************************************************************
+ * Author: Kelly Black
+ * Date: October 2018
+ *
+ * Program to calculate the relative weights associated with each flow in a tropic system
+ * with respect to the relative importance. Formula developed with Caner Kazanci, Malcolm
+ * Adams, Stuart Whipple, Aladeen Al Basheer, and Bernie Patton.
+ *
+ * This is the main program. It reads in a file from the command line that has
+ * the stoichiometry matrix. It then determines the RREF of the matrix and goes
+ * through all combinations of the column vectors that might form a set of full
+ * rank. It then keeps track of which vectors were in the set and maintains the
+ * relevant statistics.
+ *
+ * Copyright © 2018 Kelly Black
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the “Software”), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ *
+ * ************************************************************************************************ */
+
 #include <iostream>
 #include <iomanip>
 #include <string>
