@@ -162,7 +162,12 @@ bool testFullColumnSet(Matrix<double> *originalStoichiometry,
             // at the end whose column numbers were larger than what was in the test list.
             // Increment everything that follows.
             while(lupe<feasibleByColumn->getLength())
-                (*feasibleByColumn)[lupe++] += 1;
+            {
+                (*feasibleByColumn)[lupe] += 1;
+                (*sumInvConditionNumbers)[lupe] += conditionNumber;
+                (*sumConditionNumbers)[lupe] += 1.0/conditionNumber;
+                lupe += 1;
+            }
 
         }
     }
@@ -275,8 +280,15 @@ int main(int argc,char **argv)
                  &sumConditionNumbers,&sumInvConditionNumbers,
                  previouslyChecked);
 
-    std::cout << "Number Feasible: " << numberFeasible << std::endl << "Feasible by column: " << std::endl;
-    feasibleByColumn.printVector();
+    std::cout << "Number Feasible: " << numberFeasible << std::endl << "Feasible by column: " << std::endl
+              << "Node Feasible Sum Cond. Sum Inv Cond" << std::endl;
+    for(int lupe=0;lupe<feasibleByColumn.getLength();++lupe)
+        std::cout << std::setw(4) << lupe << "   "
+                  << std::setw(6) << feasibleByColumn[lupe] << " "
+                  << std::setw(9) << sumConditionNumbers[lupe] << " "
+                  << std::setw(10) << sumInvConditionNumbers[lupe]
+                  << std::endl;
+
     std::cout << "Done" << std::endl;
 
 #ifdef DEBUG
