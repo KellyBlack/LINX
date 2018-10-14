@@ -10,6 +10,10 @@
  * insertion sort to add new columns sequentially. This way the tree used in the
  * CheckedColumnsTree class will not consider order.
  *
+ * The class does not keep track of the column vectors in the stoichiometry matrix.
+ * Rather, it keeps track of the column number. So "4" refers to the column vector
+ * in the matrix with index 4. (The numbering starts at 0.)
+ *
  * Copyright © 2018 Kelly Black
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
@@ -36,17 +40,22 @@
 
 #include "foundfeasible.h"
 
+// Base constructor. Nothing to do....
 FoundFeasible::FoundFeasible()
 {
 
 }
 
+// Method to remove all entries from the list of checked columns.
+// This removes everything from the columns list.
 void FoundFeasible::clearList()
 {
     while(columns.size()>0)
         columns.pop_back();
 }
 
+// Method to print out all of the items being kept track of in this
+// list. Used for debugging.
 void FoundFeasible::printList()
 {
     std::list<int>::iterator listValues;
@@ -57,8 +66,12 @@ void FoundFeasible::printList()
     std::cout << std::endl;
 }
 
+// Method to add a new column number to the current list of columns being tracked.
+// It uses an insertion sort to insure that the column numbers are in ascending
+// order.
 void FoundFeasible::addColumn(int value)
 {
+    // Start at the beginning of the list and move through it sequentially.
     std::list<int>::iterator listValues;
     for(listValues=columns.begin();listValues!=columns.end();++listValues)
     {
@@ -73,19 +86,25 @@ void FoundFeasible::addColumn(int value)
     columns.push_back(value);
 }
 
+
+// Overloaded output operator. Allows the list to be printed
+// simply by piping it to an output stream.
 std::ostream& operator<<(std::ostream& os, FoundFeasible& v)
-{
+{    
     std::list<int>::iterator values;
     for(values=v.columns.begin();values!=v.columns.end();++values)
         os << *values << "-";
     return(os);
 }
 
+// Method used to see if a given set of column numbers are located in the list of all
+// the sets being tracked. This does a sequential sort through the linked list of
+// column sets. IT IS VERY SLOW. It is used in debugging to check other approaches
+// to tracking the columns that have been checked. It is slow but is reliable.
 bool FoundFeasible::match(Vector<int> *indicies)
 {
     // See if the two lists have the same length.
     bool found = (std::size_t)indicies->getLength() == columns.size();
-    //std::cout << "   Checking " << *indicies << " comparing to me " << *this << "   initial check: " << found << std::endl;
 
     std::list<int>::iterator listValues;
     for(int columnLupe = 0;found && (columnLupe<indicies->getLength());++columnLupe)
@@ -101,10 +120,10 @@ bool FoundFeasible::match(Vector<int> *indicies)
         }
         found = found && located;
     }
-    //std::cout << " match: " << found << std::endl;
     return(found);
 }
 
+// returns the number of column sets being tracked.
 int FoundFeasible::length()
 {
     return((int)columns.size());
