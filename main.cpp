@@ -95,6 +95,8 @@ bool testFullColumnSet(Matrix<double> *originalStoichiometry,
                        int *numberFeasible,
                        Vector<int> *feasibleByColumn,
                        std::list<double> *conditionNumbers,
+                       Vector<double> *sumConditionNumbers,
+                       Vector<double> *sumInvConditionNumbers,
                        Vector<int> *indicies,
                        int *numberRepeats,
                        CheckedColumnsTree   *previouslyChecked)
@@ -146,7 +148,10 @@ bool testFullColumnSet(Matrix<double> *originalStoichiometry,
                 {
                     // The column number to test is less than the current column number in the list
                     // of columns used to invert the matrix above.
-                    (*feasibleByColumn)[lupe++] += 1;
+                    (*feasibleByColumn)[lupe] += 1;
+                    (*sumInvConditionNumbers)[lupe] += conditionNumber;
+                    (*sumConditionNumbers)[lupe] += 1.0/conditionNumber;
+                    lupe += 1;
                 }
                 // We are either at the end of the list or found a column number equal to
                 // one in the list to test. Move on to the next column.
@@ -182,6 +187,8 @@ void checkColumns(Matrix<double> *rref,
                   int *numberRepeats,
                   Vector<int> *feasibleByColumn,
                   std::list<double> *conditionNumbers,
+                  Vector<double> *sumConditionNumbers,
+                  Vector<double> *sumInvConditionNumbers,
                   CheckedColumnsTree   *previouslyChecked
                   )
 {
@@ -205,6 +212,7 @@ void checkColumns(Matrix<double> *rref,
                 // We now have a full list of columns to check.
                 testFullColumnSet(originalStoichiometry,testBasis,
                                   numberFeasible,feasibleByColumn,conditionNumbers,
+                                  sumConditionNumbers,sumInvConditionNumbers,
                                   indicies,numberRepeats,previouslyChecked);
             }
             else
@@ -213,7 +221,7 @@ void checkColumns(Matrix<double> *rref,
                 // search using the next row in the RREF matrix.
                 checkColumns(rref,originalStoichiometry,testBasis,indicies,
                              numberFeasible,currentRow+1,numberRepeats,
-                             feasibleByColumn,conditionNumbers,previouslyChecked);
+                             feasibleByColumn,conditionNumbers,sumConditionNumbers,sumInvConditionNumbers,previouslyChecked);
             }
         }
     }
@@ -233,6 +241,8 @@ int main(int argc,char **argv)
     SquareMatrix<double> testBasis(stoichiometry.getNumberRows(),0.0);
     Vector<int>          indicies(stoichiometry.getNumberRows(),-1);
     Vector<int>          feasibleByColumn(stoichiometry.getNumberColumns(),0);
+    Vector<double>       sumConditionNumbers(stoichiometry.getNumberColumns(),0.0);
+    Vector<double>       sumInvConditionNumbers(stoichiometry.getNumberColumns(),0.0);
     CheckedColumnsTree   *previouslyChecked = new CheckedColumnsTree(stoichiometry.getNumberColumns(),stoichiometry.getNumberRows());
     std::list<double>    conditionNumbers;
 
@@ -262,6 +272,7 @@ int main(int argc,char **argv)
     checkColumns(&stoichiometry,&originalStoich,&testBasis,&indicies,
                  &numberFeasible,0,&numberRepeats,
                  &feasibleByColumn,&conditionNumbers,
+                 &sumConditionNumbers,&sumInvConditionNumbers,
                  previouslyChecked);
 
     std::cout << "Number Feasible: " << numberFeasible << std::endl << "Feasible by column: " << std::endl;
