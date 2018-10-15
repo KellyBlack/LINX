@@ -276,18 +276,23 @@ int main(int argc,char **argv)
     }
     std::cout << argv[1] << std::endl << std::endl << "Starting" << std::endl;
 
-    Matrix<double>       stoichiometry(argv[1]);
-    Matrix<double>       originalStoich(stoichiometry);
-    SquareMatrix<double> testBasis(stoichiometry.getNumberRows(),0.0);
-    Vector<int>          indicies(stoichiometry.getNumberRows(),-1);
-    Vector<int>          feasibleByColumn(stoichiometry.getNumberColumns(),0);
-    Vector<double>       sumConditionNumbers(stoichiometry.getNumberColumns(),0.0);
-    Vector<double>       sumInvConditionNumbers(stoichiometry.getNumberColumns(),0.0);
-    CheckedColumnsTree   *previouslyChecked = new CheckedColumnsTree(stoichiometry.getNumberColumns(),stoichiometry.getNumberRows());
-    std::list<double>    conditionNumbers;
+    // Variables used to track the stoich. matrix and the columns being tested
+    Matrix<double>       stoichiometry(argv[1]);                          // The stoichiometry matrix read from a file.
+    Matrix<double>       originalStoich(stoichiometry);                   // A copy of the stoich. matrix. Used to construct test matrices from its columns.
+    SquareMatrix<double> testBasis(stoichiometry.getNumberRows(),0.0);    // A square matrix made up of columns of the stoich. matrix. For testing.
+    Vector<int>          indicies(stoichiometry.getNumberRows(),-1);      // List of columns to test to see if they form a set of full rank.
 
-    int numberFeasible = 0;
-    int numberRepeats = 0;
+    // Variables used to track the statistics associated with the columns from the stoich. matrix that have been tested.
+    Vector<int>          feasibleByColumn(stoichiometry.getNumberColumns(),0);           // Number of times a given column appears as a feasible set.
+    Vector<double>       sumConditionNumbers(stoichiometry.getNumberColumns(),0.0);      // Sum of the cond. #'s for each matrix a column appears in a feasible set.
+    Vector<double>       sumInvConditionNumbers(stoichiometry.getNumberColumns(),0.0);   // Sum of 1/cond. #'s for each matrix a column appears in a feasible set.
+    CheckedColumnsTree   *previouslyChecked =                                            // tree structure uses to track all combinations of columns that have been tested.
+            new CheckedColumnsTree(stoichiometry.getNumberColumns(),stoichiometry.getNumberRows());
+    std::list<double>    conditionNumbers;                                               // List of all condition numbers for feasible sets.
+
+    // Test variables used for debugging.
+    int numberFeasible = 0;   // Total number of feasible sets tested.
+    int numberRepeats = 0;    // Number of times vectors were tested that have already been in a feasible test.
 
 
     /*
@@ -316,12 +321,13 @@ int main(int argc,char **argv)
                  previouslyChecked);
 
     std::cout << "Number Feasible: " << numberFeasible << std::endl << "Feasible by column: " << std::endl
-              << "Node Feasible Sum Cond. Sum Inv Cond" << std::endl;
+              << "Node Feasible     Sum Cond.   Sum Inv Cond" << std::endl;
     for(int lupe=0;lupe<feasibleByColumn.getLength();++lupe)
-        std::cout << std::setw(4) << lupe << "   "
-                  << std::setw(6) << feasibleByColumn[lupe] << " "
-                  << std::setw(9) << sumConditionNumbers[lupe] << " "
-                  << std::setw(10) << sumInvConditionNumbers[lupe]
+        std::cout << std::fixed
+                  << std::setw(4) << lupe << "    "
+                  << std::setw(5) << feasibleByColumn[lupe] << "   "
+                  << std::setw(11) << std::setprecision(5) << sumConditionNumbers[lupe] << "    "
+                  << std::setw(11) << std::setprecision(5) << sumInvConditionNumbers[lupe]
                   << std::endl;
 
     std::cout << "Done" << std::endl;
