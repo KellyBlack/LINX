@@ -44,6 +44,7 @@
 #include <iomanip>
 #include <math.h>
 #include <string>
+#include <list>
 
 
 extern "C" {
@@ -150,36 +151,47 @@ public:
     {
         std::ifstream fp(fileName); // Open a file to read.
         std::string inputLine;
-        int lineNumber = 0;
+        std::list<std::string> allLines;
 
+        // Read in the stoichiometry matrix.
+        std::getline(fp,inputLine);
         while(fp)
         {
+            allLines.push_back(inputLine);
             std::getline(fp,inputLine);
-            if(lineNumber++ <= 0)
+        }
+
+
+        // Assume that every line in the text file is dedicated to a row in the
+        // stoichiometry matrix.
+        rows = (int)allLines.size();
+
+        // Figure out how many columns there are....
+        std::size_t pos = allLines.front().find(',');
+        columns = (pos==std::string::npos)?0:1;
+        while(pos != std::string::npos)
+        {
+            columns += 1;
+            pos = allLines.back().find(',',pos+1);
+        }
+        createArray();
+
+        // Now parse each line to get the entries for each row.
+        std::list<std::string>::iterator oneRow;
+        int currentRow = 0;
+        for(oneRow=allLines.begin();(oneRow!=allLines.end())&&(oneRow->length()>0);++oneRow)
+        {
+            pos = oneRow->find(',');  // Figure out where the comma is.;
+            std::size_t currentComma = 0;
+            int currentColumn = 0;
+            while(pos != std::string::npos)
             {
-                // Ths is the first line in the file.
-                // Assume it is in the form of row,column
-                int comma = inputLine.find(',');                                   // Figure out where the comma is.
-                rows    = std::stoi(inputLine.substr(0,comma));                    // Get the number of rows.
-                columns = std::stoi(inputLine.substr(comma+1,inputLine.length())); // Get the number of columns.
-                createArray();
+                u[currentRow][currentColumn++] = std::stod(oneRow->substr(currentComma,pos-currentComma));       // Save the number in the array
+                currentComma = pos+1;                    // update where to start the next search for a comma.
+                pos = oneRow->find(",",currentComma);    // Figure out where the comma is.
             }
-            else if (inputLine.length()>0)
-            {
-                // This is a row that has entries for the matrix.
-                // Assume it is comma separated numbers.
-                std::size_t comma = inputLine.find(',');  // Figure out where the comma is.
-                int columnNumber = 0;
-                while(comma != std::string::npos)
-                {
-                    std::string number = inputLine.substr(0,comma);           // Get the next number
-                    inputLine = inputLine.substr(comma+1,inputLine.length()); // Remove the next number from the line
-                    u[lineNumber-2][columnNumber++] = std::stod(number);      // Save the number in the array
-                    comma = inputLine.find(",");                              // Figure out where the comma is.
-                }
-                // Assume that everything at the end is a number.
-                u[lineNumber-2][columnNumber++] = std::stod(inputLine);
-            }
+            u[currentRow][currentColumn++] = std::stod(oneRow->substr(currentComma));  // Save the last number in the array
+            currentRow += 1;                                                           // move on to the next row.
         }
 
         createIndexPermutation();
