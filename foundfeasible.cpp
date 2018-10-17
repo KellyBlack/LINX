@@ -39,6 +39,7 @@
 #include <iomanip>
 
 #include "foundfeasible.h"
+#include "vector.h"
 
 // Base constructor. Nothing to do....
 FoundFeasible::FoundFeasible()
@@ -50,8 +51,9 @@ FoundFeasible::FoundFeasible()
 // This removes everything from the columns list.
 void FoundFeasible::clearList()
 {
-    while(columns.size()>0)
-        columns.pop_back();
+    columns.erase(columns.begin(),columns.end());
+    //while(columns.size()>0)
+    //    columns.pop_back();
 }
 
 // Method to print out all of the items being kept track of in this

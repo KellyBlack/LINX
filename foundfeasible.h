@@ -35,7 +35,9 @@
 
 #include <list>
 //#include <vector>
-#include "vector.h"
+//#include "vector.h"
+
+template<class field> class Vector;
 
 class FoundFeasible
 {

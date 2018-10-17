@@ -46,6 +46,8 @@
 #include <string>
 #include <list>
 
+#include "foundfeasible.h"
+
 
 extern "C" {
     //extern void dswap_(int*,double*,int*,double*,int*);
@@ -155,8 +157,8 @@ public:
         const std::string delimiter = " ";
 
         // erase the list of known and unknowable columns.
-        unknowableColumns.erase(unknowableColumns.begin(),unknowableColumns.end());
-        knownColumns.erase(knownColumns.begin(),knownColumns.end());
+        unknowableColumns.clearList();
+        knownColumns.clearList();
 
         // Read in the stoichiometry matrix.
         std::getline(fp,inputLine);
@@ -284,41 +286,42 @@ public:
 
     void addUnknowableColumns(std::string unknowable,const std::string delimiter)
     {
-        std::cout << "Unknowable: " << unknowable << std::endl;
         std::size_t pos = unknowable.find(":");  // Figure out where the delimiter is.;
         std::size_t currentComma = pos;   // Start reading from the beginning of the string.
         while(pos != std::string::npos)
         {
             // There is another delimiter. Parse the next number.
             if(pos-currentComma>0)
-                std::cout << "found: " << std::stod(unknowable.substr(currentComma,pos-currentComma))
-                          << std::endl;       // Save the number in the array
+            {
+                unknowableColumns.addColumn(std::stod(unknowable.substr(currentComma,pos-currentComma)));
+            }
             currentComma = pos+1;                    // update where to start the next search for a comma.
             pos = unknowable.find(delimiter,currentComma);    // Figure out where the comma is.
         }
 
         // Add the last number in the list to the matrix.
-        std::cout << "last: " << std::stod(unknowable.substr(currentComma)) << std::endl;  // Save the last number in the array
+        unknowableColumns.addColumn(std::stod(unknowable.substr(currentComma)));
+        //unknowableColumns.printList();
     }
 
     void addKnownColumns(std::string known,const std::string delimiter)
     {
-        std::cout << "Known: " << known << std::endl;
         std::size_t pos = known.find(":");  // Figure out where the delimiter is.;
         std::size_t currentComma = pos;   // Start reading from the beginning of the string.
         while(pos != std::string::npos)
         {
             // There is another delimiter. Parse the next number.
             if(pos-currentComma>0)
-                std::cout << "found: " << std::stod(known.substr(currentComma,pos-currentComma))
-                          << std::endl;       // Save the number in the array
+            {
+                knownColumns.addColumn(std::stod(known.substr(currentComma,pos-currentComma)));
+            }
             currentComma = pos+1;                    // update where to start the next search for a comma.
             pos = known.find(delimiter,currentComma);    // Figure out where the comma is.
         }
 
         // Add the last number in the list to the matrix.
-        std::cout << "last: " << std::stod(known.substr(currentComma)) << std::endl;  // Save the last number in the array
-
+        knownColumns.addColumn(std::stod(known.substr(currentComma)));
+        //knownColumns.printList();
     }
 
     // Routine to get a pointer to one row of the matrix using the [] operator
@@ -569,8 +572,8 @@ protected:
     int columns = -1;  // number of columns in the matrix
     int* index;        // variable used to hold the current row permutations.
 
-    std::list<int> unknowableColumns; // list of columns that are considered to be unkowable.
-    std::list<int> knownColumns;      // list of columns that are considered to be known.
+    FoundFeasible unknowableColumns; // list of columns that are considered to be unkowable.
+    FoundFeasible knownColumns;      // list of columns that are considered to be known.
 
 };
 
