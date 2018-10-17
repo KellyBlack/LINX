@@ -154,6 +154,10 @@ public:
         std::list<std::string> allLines;
         const std::string delimiter = " ";
 
+        // erase the list of known and unknowable columns.
+        unknowableColumns.erase(unknowableColumns.begin(),unknowableColumns.end());
+        knownColumns.erase(knownColumns.begin(),knownColumns.end());
+
         // Read in the stoichiometry matrix.
         std::getline(fp,inputLine);
         rows = 0;
@@ -164,7 +168,7 @@ public:
             if(rows<=0)
             {
                 // We are still reading the stoichiometry matrix.
-                if(inputLine.length()==0)
+                if((inputLine.length()==0)||(inputLine.find(':')!=std::string::npos))
                     rows *= -1; // We have hit the end of the matrix. Stop now.
                 else
                     rows -= 1;  // decrement the row count.
@@ -187,53 +191,42 @@ public:
         // Now parse each line to get the entries for each row.
         std::list<std::string>::iterator oneRow;
         int currentRow = 0;
-        bool stoichiometryMatrix = true;
         for(oneRow=allLines.begin();(oneRow!=allLines.end());++oneRow)
         {
-            if(oneRow->length()==0)
-                stoichiometryMatrix = false; // have reached the end of the def.
-                                             // of the stoich. matrix.
-
-            else
+            if(currentRow<rows)
             {
-
-                if(stoichiometryMatrix)
+                // We are still reading the stoichiometry matrix.
+                // Parse the line and enter each number.
+                pos = oneRow->find(delimiter);  // Figure out where the delimiter is.;
+                std::size_t currentComma = 0;   // Start reading from the beginning of the string.
+                int currentColumn = 0;
+                while(pos != std::string::npos)
                 {
-                    // We are still reading the stoichiometry matrix.
-                    // Parse the line and enter each number.
-                    pos = oneRow->find(delimiter);  // Figure out where the delimiter is.;
-                    std::size_t currentComma = 0;   // Start reading from the beginning of the string.
-                    int currentColumn = 0;
-                    while(pos != std::string::npos)
-                    {
-                        // There is another delimiter. Parse the next number.
-                        u[currentRow][currentColumn++] = std::stod(oneRow->substr(currentComma,pos-currentComma));       // Save the number in the array
-                        currentComma = pos+1;                    // update where to start the next search for a comma.
-                        pos = oneRow->find(delimiter,currentComma);    // Figure out where the comma is.
-                    }
-
-                    // Add the last number in the list to the matrix.
-                    u[currentRow][currentColumn++] = std::stod(oneRow->substr(currentComma));  // Save the last number in the array
-                    currentRow += 1;                                                           // move on to the next row.
+                    // There is another delimiter. Parse the next number.
+                    u[currentRow][currentColumn++] = std::stod(oneRow->substr(currentComma,pos-currentComma));       // Save the number in the array
+                    currentComma = pos+1;                    // update where to start the next search for a comma.
+                    pos = oneRow->find(delimiter,currentComma);    // Figure out where the comma is.
                 }
 
-                else if ((oneRow->find("unknowable:") != std::string::npos) &&
-                         (oneRow->find("unknowable:")>=0))
-                {
-                    // This is a row of flows in the stoichiometry matrix that.
-                    // cannot be measured. Each number coresponds to a column in
-                    // the stoichiometry matrix whose flow is assumed to be unmeasurable.
-                    addUnknowableColumns(*oneRow,delimiter);
-                }
+                // Add the last number in the list to the matrix.
+                u[currentRow][currentColumn++] = std::stod(oneRow->substr(currentComma));  // Save the last number in the array
+                currentRow += 1;                                                           // move on to the next row.
+            }
 
-                else if ((oneRow->find("known:") != std::string::npos) &&
-                         (oneRow->find("known:")>=0))
-                {
-                    // This is a row of known flows in the stoichiometry matrix.
-                    // Each number coresponds to a column in the stoichiometry
-                    // matrix whose flow is assumed to be already known.
-                    addKnownColumns(*oneRow,delimiter);
-                }
+            else if (oneRow->find("unknowable:") != std::string::npos)
+            {
+                // This is a row of flows in the stoichiometry matrix that.
+                // cannot be measured. Each number coresponds to a column in
+                // the stoichiometry matrix whose flow is assumed to be unmeasurable.
+                addUnknowableColumns(*oneRow,delimiter);
+            }
+
+            else if (oneRow->find("known:") != std::string::npos)
+            {
+                // This is a row of known flows in the stoichiometry matrix.
+                // Each number coresponds to a column in the stoichiometry
+                // matrix whose flow is assumed to be already known.
+                addKnownColumns(*oneRow,delimiter);
             }
         }
 
@@ -575,6 +568,10 @@ protected:
     int rows = -1;     // number of rows in the matrix
     int columns = -1;  // number of columns in the matrix
     int* index;        // variable used to hold the current row permutations.
+
+    std::list<int> unknowableColumns; // list of columns that are considered to be unkowable.
+    std::list<int> knownColumns;      // list of columns that are considered to be known.
+
 };
 
 
@@ -715,9 +712,6 @@ public:
 protected:
     field *work;
     int *iwork;
-
-    std::list<int> unknowableColuns;
-    std::list<int> knownColumns;
 };
 
 #endif // VECTOR_H
