@@ -244,7 +244,7 @@ public:
         columns = other.getNumberColumns();
         createArray();
 
-        // Finally copy everything over....
+        // Now copy everything in the array over....
         for(int rowLupe=0;rowLupe<rows;++rowLupe)
             for(int colLupe=0;colLupe<columns;++colLupe)
             {
@@ -252,6 +252,19 @@ public:
             }
 
         createIndexPermutation();
+
+        // Now copy over the values of the list of unknowables over to this object.
+        for(other.beginUnknowableIterations();other.unknowableIterationDone();other.nextUnknowableIteration())
+        {
+            pushUnknowableValue(other.getCurrentUnknowableValue());
+        }
+
+        // Now copy over the values of the list of the known columns over to this object.
+        for(other.beginKnownIterations();other.knownIterationDone();other.nextKnownIteration())
+        {
+            pushKnownValue(other.getCurrentKnownValue());
+        }
+
     }
 
     // routine to allocate and initialize the space for the array
@@ -368,7 +381,7 @@ public:
             for(int rowLupe=0;rowLupe<rows;++rowLupe)
                 u[rowLupe] = u[0] + rowLupe*columns;
 
-            // Finally copy everything over....
+            // Now copy everything in the matrix over....
             for(int rowLupe=0;rowLupe<rows;++rowLupe)
             {
                 index[rowLupe] = other.getRowIndex(rowLupe);
@@ -377,6 +390,16 @@ public:
                     u[rowLupe][colLupe] = other[rowLupe][colLupe];
                 }
             }
+
+            // Lastly, copy over the values in the known and unknowable lists.
+            // Do the unknowable values first.
+            /*
+            std::cout << "List of unknowables" << std::endl;
+            for(other.beginUnknowableIterations();!other.unknowableIterationDone();other.nextUnknowableIteration())
+            {
+                std::cout << other.getCurrentUnknowableValue() << std::endl;
+            }
+            */
 
         }
 
@@ -563,6 +586,77 @@ public:
             }
         }
         std::cout << std::endl;
+
+        if(unknowableColumns.length()>0)
+        {
+            std::cout << "Unkowable: ";
+            unknowableColumns.printList();
+        }
+
+        if(knownColumns.length()>0)
+        {
+            std::cout << "Known: ";
+            knownColumns.printList();
+        }
+    }
+
+    // Method to determine whether or not a column number can be found in the list
+    // of unknowable columns.
+    bool includesUnknowable(FoundFeasible *checkColumns)
+    {
+        return(false);
+    }
+
+    // Method to start the process for stepping through the unknowable values.
+    void beginUnknowableIterations()
+    {
+        unknowableColumns.startIteration();
+    }
+
+    int getCurrentUnknowableValue()
+    {
+        return(unknowableColumns.currentValue());
+    }
+
+    void nextUnknowableIteration()
+    {
+        unknowableColumns.next();
+    }
+
+    bool unknowableIterationDone()
+    {
+        return(unknowableColumns.iterationDone());
+    }
+
+    void pushUnknowableValue(int value)
+    {
+        unknowableColumns.addColumn(value);
+    }
+
+    // Method to start the process for stepping through the known values.
+    void beginKnownIterations()
+    {
+        knownColumns.startIteration();
+    }
+
+    int getCurrentKnownValue()
+    {
+        return(knownColumns.currentValue());
+    }
+
+    void nextKnownIteration()
+    {
+        knownColumns.next();
+    }
+
+    bool knownIterationDone()
+    {
+        return(knownColumns.iterationDone());
+    }
+
+    void pushKnownValue(int value)
+    {
+        knownColumns.addColumn(value);
     }
 
 

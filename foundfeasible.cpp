@@ -60,10 +60,12 @@ void FoundFeasible::clearList()
 // list. Used for debugging.
 void FoundFeasible::printList()
 {
-    std::list<int>::iterator listValues;
-    for(listValues=columns.begin();listValues!=columns.end();++listValues)
+    std::list<int>::iterator listValues = columns.begin();
+    if(listValues!=columns.end())
+        std::cout << *listValues++;
+    for(;listValues!=columns.end();++listValues)
     {
-        std::cout << *listValues << "-";
+        std::cout  << "-" << *listValues;
     }
     std::cout << std::endl;
 }
