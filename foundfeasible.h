@@ -48,6 +48,8 @@ public:
     void clearList();
     void printList();
     void addColumn(int value);
+    bool columnExists(int value);
+    bool allColumnsExist(Vector<int> *indicies,int depth);
     bool match(Vector<int> *indicies);
     int length();
 

@@ -239,6 +239,7 @@ void checkColumns(Matrix<double> *rref,
         (*indicies)[currentRow] = lupe;
         if((fabs((*rref)[currentRow][lupe])>1.0e-9)
                 && (!columnExists(indicies,currentRow,lupe))
+                && (!originalStoichiometry->columnEntryInKnown(lupe))
                 //&& (!columnsConsidered(rref,indicies,currentRow,lupe))
                 )
         {
@@ -249,11 +250,14 @@ void checkColumns(Matrix<double> *rref,
             // Add this column to the list of columns currently under consideration.
             if( (currentRow+1) >= rref->getNumberRows())
             {
-                // We now have a full list of columns to check.
-                testFullColumnSet(originalStoichiometry,testBasis,
-                                  numberFeasible,feasibleByColumn,conditionNumbers,
-                                  sumConditionNumbers,sumInvConditionNumbers,
-                                  indicies,numberRepeats,previouslyChecked);
+                if(originalStoichiometry->allColumnsInUnknowable(indicies,currentRow+1))
+                {
+                    // We now have a full list of columns to check.
+                    testFullColumnSet(originalStoichiometry,testBasis,
+                                      numberFeasible,feasibleByColumn,conditionNumbers,
+                                      sumConditionNumbers,sumInvConditionNumbers,
+                                      indicies,numberRepeats,previouslyChecked);
+                }
             }
             else
             {
@@ -293,7 +297,6 @@ int main(int argc,char **argv)
     // Test variables used for debugging.
     int numberFeasible = 0;   // Total number of feasible sets tested.
     int numberRepeats = 0;    // Number of times vectors were tested that have already been in a feasible test.
-
 
     /*
     indicies[0] = 0;

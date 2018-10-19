@@ -300,7 +300,7 @@ public:
     void addUnknowableColumns(std::string unknowable,const std::string delimiter)
     {
         std::size_t pos = unknowable.find(":");  // Figure out where the delimiter is.;
-        std::size_t currentComma = pos;   // Start reading from the beginning of the string.
+        std::size_t currentComma = pos;          // Start reading from the beginning of the string.
         while(pos != std::string::npos)
         {
             // There is another delimiter. Parse the next number.
@@ -308,19 +308,18 @@ public:
             {
                 unknowableColumns.addColumn(std::stod(unknowable.substr(currentComma,pos-currentComma)));
             }
-            currentComma = pos+1;                    // update where to start the next search for a comma.
-            pos = unknowable.find(delimiter,currentComma);    // Figure out where the comma is.
+            currentComma = pos+1;                          // update where to start the next search for a comma.
+            pos = unknowable.find(delimiter,currentComma); // Figure out where the comma is.
         }
 
         // Add the last number in the list to the matrix.
         unknowableColumns.addColumn(std::stod(unknowable.substr(currentComma)));
-        //unknowableColumns.printList();
     }
 
     void addKnownColumns(std::string known,const std::string delimiter)
     {
         std::size_t pos = known.find(":");  // Figure out where the delimiter is.;
-        std::size_t currentComma = pos;   // Start reading from the beginning of the string.
+        std::size_t currentComma = pos;     // Start reading from the beginning of the string.
         while(pos != std::string::npos)
         {
             // There is another delimiter. Parse the next number.
@@ -328,14 +327,81 @@ public:
             {
                 knownColumns.addColumn(std::stod(known.substr(currentComma,pos-currentComma)));
             }
-            currentComma = pos+1;                    // update where to start the next search for a comma.
-            pos = known.find(delimiter,currentComma);    // Figure out where the comma is.
+            currentComma = pos+1;                     // update where to start the next search for a comma.
+            pos = known.find(delimiter,currentComma); // Figure out where the comma is.
         }
 
         // Add the last number in the list to the matrix.
         knownColumns.addColumn(std::stod(known.substr(currentComma)));
-        //knownColumns.printList();
     }
+
+    // Method to check to see if any of the entries in the list of unknowables
+    // shows up in a given set of indicies.
+    bool columnEntryInUnknowable(Vector<int> *indicies,int depth)
+    {
+        return(columnEntryInList(&unknowableColumns,indicies,depth));
+    }
+
+    // Generic method to see if any of the entries in a list shows up
+    // in a given set of indices
+    bool columnEntryInList(FoundFeasible *columnList,
+                           Vector<int> *indicies,int depth)
+    {
+        // go through each item in the list of indices.
+        for(int lupe=0;(lupe<indicies->getLength())&&(lupe<depth);++lupe)
+        {
+            // if this item exists in the list then return true.
+            if(columnList->columnExists((*indicies)[lupe]))
+                return(true);
+        }
+        // looks like the item was not found.
+        return(false);
+    }
+
+    // Method to check to see if any of the entries in the list of unknowables
+    // shows up for one index value
+    bool columnEntryInUnknowable(field value)
+    {
+        // if this item exists in the list then return true.
+        return(unknowableColumns.columnExists(value));
+    }
+
+    // Method to check to see if any of the entries in the list of knowns
+    // shows up for one index value
+    bool columnEntryInKnown(field value)
+    {
+        // if this item exists in the list then return true.
+        return(knownColumns.columnExists(value));
+    }
+
+
+    // Method to check to see if *all* of the entries in the list of knowns
+    // shows up in a given set of indicies.
+    bool allColumnsInKnown(Vector<int> *indicies,int depth)
+    {
+        return(allColumnsInList(&knownColumns,indicies,depth));
+    }
+
+    // Method to check to see if *all* of the entries in the list of knowns
+    // shows up in a given set of indicies.
+    bool allColumnsInUnknowable(Vector<int> *indicies,int depth)
+    {
+        return(allColumnsInList(&unknowableColumns,indicies,depth));
+    }
+
+
+    // Generic method to check to see if *all* of the entries in
+    // a list shows up in a given set of indicies
+    bool allColumnsInList(FoundFeasible *columnList,
+                          Vector<int> *indicies,int depth)
+    {
+        // if there are no entries in the list of known columns
+        // default to true.
+        if(columnList->length()==0)
+            return(true);
+        return(columnList->allColumnsExist(indicies,depth));
+    }
+
 
     // Routine to get a pointer to one row of the matrix using the [] operator
     field*& operator [] (int which)
@@ -589,7 +655,7 @@ public:
 
         if(unknowableColumns.length()>0)
         {
-            std::cout << "Unkowable: ";
+            std::cout << "Unknowable: ";
             unknowableColumns.printList();
         }
 
@@ -666,7 +732,7 @@ protected:
     int columns = -1;  // number of columns in the matrix
     int* index;        // variable used to hold the current row permutations.
 
-    FoundFeasible unknowableColumns; // list of columns that are considered to be unkowable.
+    FoundFeasible unknowableColumns; // list of columns that are considered to be unknowable.
     FoundFeasible knownColumns;      // list of columns that are considered to be known.
 
 };

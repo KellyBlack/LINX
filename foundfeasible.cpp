@@ -90,6 +90,47 @@ void FoundFeasible::addColumn(int value)
     columns.push_back(value);
 }
 
+// Method to see if the given value exists in the current list
+// of columns being tracked. Returns true if it exists, otherwise
+// it is false.
+bool FoundFeasible::columnExists(int value)
+{
+    // go through each item in the list of values.
+    std::list<int>::iterator listValues;
+    for(listValues=columns.begin();(listValues!=columns.end())&&(*listValues<=value);++listValues)
+    {
+        if(*listValues==value)
+        {
+            return(true);      // the item was found!
+        }
+    }
+    // The item was not found.
+    return(false);
+}
+
+// Method to see if all of the current list of values exist somewhere within a
+// given set of indicies.
+bool FoundFeasible::allColumnsExist(Vector<int> *indicies, int depth)
+{
+    //  go through the list of values
+    std::list<int>::iterator listValues;
+    bool foundIt;
+    for(listValues=columns.begin();listValues!=columns.end();++listValues)
+    {
+        // need to see if the current value is located somewhere in the list.
+        // If not then return false.
+        foundIt = false;
+        for(int lupe=0;(!foundIt) && (lupe<indicies->getLength()) && (lupe<depth);++lupe)
+        {
+            foundIt = (*listValues==(*indicies)[lupe]);
+        }
+        if(!foundIt)
+            return(false); // this value was missing.
+    }
+
+    // everything was found. Huzzah!
+    return(true);
+}
 
 // Overloaded output operator. Allows the list to be printed
 // simply by piping it to an output stream.
