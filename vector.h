@@ -155,6 +155,8 @@ public:
         std::string inputLine;
         std::list<std::string> allLines;
         const std::string delimiter = " ";
+        std::list<std::string>::iterator oneRow;
+
 
         // erase the list of known and unknowable columns.
         unknowableColumns.clearList();
@@ -181,17 +183,23 @@ public:
 
 
         // Figure out how many columns there are....
-        std::size_t pos = allLines.front().find(delimiter);
-        columns = (pos==std::string::npos)?0:1;
-        while(pos != std::string::npos)
+        std::size_t pos = determineNextNondelimiter(0,allLines.front(),delimiter);
+        columns = 0;
+        while((pos<allLines.front().length())&&(pos != std::string::npos))
         {
+            // move past the current column, and get the start of the next column.
             columns += 1;
             pos = allLines.front().find(delimiter,pos+1);
+
+            // At this point we could be at the start of another number,
+            // at the end of the string, or at the start of a delimiter.
+            // (For example, there may be multiple spaces between numbers.)
+            pos = (pos==std::string::npos)?allLines.front().length() :
+                          determineNextNondelimiter(pos,allLines.front(),delimiter);
         }
         createArray();
 
         // Now parse each line to get the entries for each row.
-        std::list<std::string>::iterator oneRow;
         int currentRow = 0;
         for(oneRow=allLines.begin();(oneRow!=allLines.end());++oneRow)
         {
@@ -199,15 +207,17 @@ public:
             {
                 // We are still reading the stoichiometry matrix.
                 // Parse the line and enter each number.
-                pos = oneRow->find(delimiter);  // Figure out where the delimiter is.;
+                pos = determineNextNondelimiter(0,*oneRow,delimiter);
+                pos = oneRow->find(delimiter,pos);  // Figure out where the delimiter is.;
                 std::size_t currentComma = 0;   // Start reading from the beginning of the string.
                 int currentColumn = 0;
                 while(pos != std::string::npos)
                 {
                     // There is another delimiter. Parse the next number.
                     u[currentRow][currentColumn++] = std::stod(oneRow->substr(currentComma,pos-currentComma));       // Save the number in the array
-                    currentComma = pos+1;                    // update where to start the next search for a comma.
-                    pos = oneRow->find(delimiter,currentComma);    // Figure out where the comma is.
+                    currentComma = pos+1;                                            // update where to start the next search for a comma.
+                    currentComma = determineNextNondelimiter(pos,*oneRow,delimiter); // Move past extra delimiters
+                    pos = oneRow->find(delimiter,currentComma);                      // Figure out where the comma is.
                 }
 
                 // Add the last number in the list to the matrix.
@@ -285,6 +295,18 @@ public:
         delete [] u;
         rows = -1;
         columns = -1;
+    }
+
+    // Method to determine the position of the next character in the string that is not
+    // the delimiter
+    std::size_t determineNextNondelimiter(std::size_t pos,std::string currentLine,const std::string &delimiter)
+    {
+        while((pos<currentLine.length())&&(currentLine.substr(pos,1)==delimiter))
+        {
+            // This position in the string is a delimiter. Check the next character...
+            pos += 1;
+        }
+        return(pos);
     }
 
     // routine to initialize the index vector that holds the current row permutations.
@@ -666,12 +688,6 @@ public:
         }
     }
 
-    // Method to determine whether or not a column number can be found in the list
-    // of unknowable columns.
-    bool includesUnknowable(FoundFeasible *checkColumns)
-    {
-        return(false);
-    }
 
     // Method to start the process for stepping through the unknowable values.
     void beginUnknowableIterations()
