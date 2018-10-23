@@ -1,5 +1,6 @@
 /* ************************************************************************************************
  * Author: Kelly Black
+ *         University of Georgia, Dept. of Mathematics, kjblack@gmail.com
  * Date: October 2018
  *
  * Program to calculate the relative weights associated with each flow in a tropic system
