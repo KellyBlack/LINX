@@ -480,16 +480,21 @@ public:
                 }
             }
 
-            // Lastly, copy over the values in the known and unknowable lists.
-            // Do the unknowable values first.
-            /*
-            std::cout << "List of unknowables" << std::endl;
-            for(other.beginUnknowableIterations();!other.unknowableIterationDone();other.nextUnknowableIteration())
-            {
-                std::cout << other.getCurrentUnknowableValue() << std::endl;
-            }
-            */
+            // erase the list of known and unknowable columns.
+            unknowableColumns.clearList();
+            knownColumns.clearList();
 
+            // Now copy over the values of the list of unknowables over to this object.
+            for(other.beginUnknowableIterations();other.unknowableIterationDone();other.nextUnknowableIteration())
+            {
+                pushUnknowableValue(other.getCurrentUnknowableValue());
+            }
+
+            // Now copy over the values of the list of the known columns over to this object.
+            for(other.beginKnownIterations();other.knownIterationDone();other.nextKnownIteration())
+            {
+                pushKnownValue(other.getCurrentKnownValue());
+            }
         }
 
         return(*this);
@@ -788,8 +793,8 @@ public:
     // method to allocate space for the workspace array
     void createWorkspace()
     {
-        work = new field[5*this->rows];
-        iwork   = new int[2*this->rows];
+        work  = new field[5*this->rows];
+        iwork = new int[2*this->rows];
     }
 
     /* *************************************************************************
