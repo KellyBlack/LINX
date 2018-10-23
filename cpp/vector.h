@@ -656,7 +656,7 @@ public:
         int outerLupe;
 
 
-        std::cout << std::endl << std::endl << getNumberRows() << "-" << getNumberColumns() << std::endl << "      ";
+        std::cout << std::endl << std::endl << getNumberRows() << "-" << getNumberColumns() << std::endl << "     ";
 
         // Print out the top row that has column numbers
         for(innerLupe=0;innerLupe<getNumberColumns();++innerLupe)
@@ -667,7 +667,7 @@ public:
 
         for (outerLupe=0;outerLupe<getNumberRows();++outerLupe)
         {
-            std::cout << std::endl << "(" << outerLupe << ")" << getNumberRows()<< " ";
+            std::cout << std::endl << "(" << outerLupe << ") " ;
             for(innerLupe=0;innerLupe<getNumberColumns();++innerLupe)
             {
                 std::cout <<  std::setw(4) << u[outerLupe][innerLupe]  << " ";

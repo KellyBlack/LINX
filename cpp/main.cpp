@@ -278,7 +278,6 @@ int main(int argc,char **argv)
         std::cout << "Error - Command line should include name of file that has the stoichiometry matrix: \"" << argv[0] << " stoich.txt.\"" << std::endl << std::endl;
         exit(1);
     }
-    std::cout << argv[1] << std::endl << std::endl << "Starting" << std::endl;
 
     // Variables used to track the stoich. matrix and the columns being tested
     Matrix<double>       stoichiometry(argv[1]);                          // The stoichiometry matrix read from a file.
@@ -298,25 +297,10 @@ int main(int argc,char **argv)
     int numberFeasible = 0;   // Total number of feasible sets tested.
     int numberRepeats = 0;    // Number of times vectors were tested that have already been in a feasible test.
 
-    /*
-    indicies[0] = 0;
-    indicies[1] = 1;
-    indicies[2] = 3;
-    indicies[3] = 4;
-    indicies[4] = 5;
-    indicies[5] = 11;
-    testBasis.copyColumnsToRows(&stoichiometry,&indicies);
-    testBasis.printArray();
-    //std::cout << "Result of LU Decomposition: " << testBasis.dgetrf() << std::endl;
-
-    std::cout << "The norm of the matrix: " << testBasis.dlange() << std::endl;
-    std::cout << "The reciprocol of the condition number: " << testBasis.dgecon(true) << std::endl;
-    testBasis.printArray();
-    */
 
     stoichiometry.printArray();
     stoichiometry.RREF();
-    stoichiometry.printArray();
+    //stoichiometry.printArray();
     checkColumns(&stoichiometry,&originalStoich,&testBasis,&indicies,
                  &numberFeasible,0,&numberRepeats,
                  &feasibleByColumn,&conditionNumbers,
@@ -333,7 +317,6 @@ int main(int argc,char **argv)
                   << std::setw(11) << std::setprecision(5) << sumInvConditionNumbers[lupe]
                   << std::endl;
 
-    std::cout << "Done" << std::endl;
 
 #ifdef DEBUG
     std::cout << "Number of repeats: " << numberRepeats << std::endl;
