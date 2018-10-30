@@ -272,6 +272,30 @@ void checkColumns(Matrix<double> *rref,
     }
 }
 
+/* *******************************************************************************
+ * Routine to calculate the value of n choose k. Uses the identity that
+ * n choose k is equal to (n/k)*( (n-1) choose (k-1) ).
+ * ******************************************************************************* */
+long combinations(int n,int k)
+{
+    // make sure everything is okay.
+    if(n<k)
+        return(0);
+    else if (2*k < n)
+        // use the identity that nCk = nCn-k.
+        // In this case there are fewer computations for nCn-k.
+        return(combinations(n,n-k));
+
+    int combinations = 1;
+    long lupe;
+    long denominator = 1;
+    for(lupe=(long)n;lupe>(long)(n-k);--lupe)
+        combinations = combinations*lupe/(denominator++);
+    return(combinations);
+}
+
+
+
 int main(int argc,char **argv)
 {
     if(argc < 2)
