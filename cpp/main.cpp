@@ -332,7 +332,10 @@ int main(int argc,char **argv)
                  &sumConditionNumbers,&sumInvConditionNumbers,
                  previouslyChecked);
 
-    std::cout << "Number Feasible: " << numberFeasible << std::endl << "Feasible by column: " << std::endl
+    long numberPossible = combinations(stoichiometry.getNumberColumns()-1,stoichiometry.getNumberRows());
+    std::cout << "Number Feasible: " << numberFeasible << std::endl
+              << "Normalization: "   << numberPossible << std::endl
+              << "Feasible by column: " << std::endl
               << "Node Feasible     Sum Cond.   Sum Inv Cond" << std::endl;
     for(int lupe=0;lupe<feasibleByColumn.getLength();++lupe)
         std::cout << std::fixed
