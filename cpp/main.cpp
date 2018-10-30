@@ -286,7 +286,7 @@ long combinations(int n,int k)
         // In this case there are fewer computations for nCn-k.
         return(combinations(n,n-k));
 
-    int combinations = 1;
+    long combinations = 1;
     long lupe;
     long denominator = 1;
     for(lupe=(long)n;lupe>(long)(n-k);--lupe)
@@ -336,15 +336,26 @@ int main(int argc,char **argv)
     std::cout << "Number Feasible: " << numberFeasible << std::endl
               << "Normalization: "   << numberPossible << std::endl
               << "Feasible by column: " << std::endl
-              << "Node Feasible     Sum Cond.   Sum Inv Cond" << std::endl;
+              << "Node Feasible     Sum Cond.   Sum Inv Cond         Impact" << std::endl;
     for(int lupe=0;lupe<feasibleByColumn.getLength();++lupe)
+    {
         std::cout << std::fixed
                   << std::setw(4) << lupe << "    "
                   << std::setw(5) << feasibleByColumn[lupe] << "   "
                   << std::setw(11) << std::setprecision(5) << sumConditionNumbers[lupe] << "    "
-                  << std::setw(11) << std::setprecision(5) << sumInvConditionNumbers[lupe]
-                  << std::endl;
-
+                  << std::setw(11) << std::setprecision(5) << sumInvConditionNumbers[lupe] << "    ";
+        if(feasibleByColumn[lupe]>0)
+        {
+            // This flow appears in at least one valid representation.
+            std::cout << std::setw(11) << std::setprecision(5) << sumInvConditionNumbers[lupe]*sumConditionNumbers[lupe]/(((double)feasibleByColumn[lupe])*((double)numberFeasible));
+        }
+        else
+        {
+            // This flow does not appear in any valid representations.
+            std::cout << "         NA";
+        }
+        std::cout<< std::endl;
+    }
 
 #ifdef DEBUG
     std::cout << "Number of repeats: " << numberRepeats << std::endl;
