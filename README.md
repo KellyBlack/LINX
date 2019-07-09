@@ -1,2 +1,2 @@
-# UtilityAnalysis
-Codes and examples that are explored in the paper "Optimal  strategy  for  determining  flow-rates  of  ecosystem2models  (at  steady-state)." To be submitted Fall 2018
+# Flow-Importance-Index
+Codes and examples that are explored in the paper "LINX: A topology based methodology to rank the importance of flow measurements in compartmental systems"
