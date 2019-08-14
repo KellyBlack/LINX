@@ -140,9 +140,9 @@ bool testFullColumnSet(Matrix<double> *originalStoichiometry,
                        int *numberRepeats,
                        CheckedColumnsTree   *previouslyChecked)
 {
-    // form a matrix with the appropriate columns of the original stoichiometry matrix
-    // create the list of columns and keep them in a useable form.
-    // First record the current combination.
+    // Using the current state form a matrix with the appropriate columns of the
+    // original stoichiometry matrix create the list of columns and keep them in
+    // a useable form. First record the current combination.
     FoundFeasible newColumns;
     newColumns.clearList();
     for(int foundLupe=0;foundLupe<indicies->getLength();++foundLupe)
@@ -238,7 +238,8 @@ void checkColumns(Matrix<double> *rref,
                   CheckedColumnsTree   *previouslyChecked
                   )
 {
-    // Go through each column for the current row. Check to see which entries are
+    // Go through each column for the current row in the RREF of the original
+    // stoichiometry matrix. Check to see which entries are
     // non-zero....
     for(int lupe=0;lupe<rref->getNumberColumns();++lupe)
     {
@@ -249,7 +250,7 @@ void checkColumns(Matrix<double> *rref,
                 //&& (!columnsConsidered(rref,indicies,currentRow,lupe))
                 )
         {
-            // This entry in the RREF matrix is non-zer0.
+            // This entry in the RREF matrix is non-zero.
             // The column has also not been checked previously.
             // It is a potential column to check.
 
