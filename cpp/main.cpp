@@ -168,7 +168,7 @@ bool testFullColumnSet(Matrix<double> *originalStoichiometry,
         // First get the matrix norm.
         double matrixNorm  = originalCopy.dlange();
         double inverseNorm = testBasis->dgecon(false);
-        double conditionNumber  = matrixNorm*inverseNorm;
+        double conditionNumber  = inverseNorm/matrixNorm;
         conditionNumbers->push_back(conditionNumber);
 #ifdef DEBUG
         std::cout << *numberFeasible << " " << matrixNorm << "/" << inverseNorm << std::endl;
@@ -384,6 +384,19 @@ int main(int argc,char **argv)
                  &sumConditionNumbers,&sumInvConditionNumbers,
                  previouslyChecked);
 
+    // At this point all of the potential combinations of flows have been checked.
+    // The vector sumInvConditionNumbers has the sum of the reciprocol of the
+    // condition numbers for each flow.
+    //
+    // Before printing it out the max value needs to be determined. It is used
+    // to normalize the values that get printed out.
+    double maxSumInvCondNumbers = 0.0;
+    for(int lupe=0;lupe<feasibleByColumn.getLength();++lupe)
+    {
+        if(maxSumInvCondNumbers<sumInvConditionNumbers[lupe])
+            maxSumInvCondNumbers = sumInvConditionNumbers[lupe];
+    }
+
 //#define FULLPRINTOUT
     std::cout
 #ifdef FULLPRINTOUT
@@ -411,7 +424,7 @@ int main(int argc,char **argv)
         {
             // This flow appears in at least one valid representation.
             std::cout << std::setw(11) << std::setprecision(5)
-                      << sumInvConditionNumbers[lupe]*sumConditionNumbers[lupe]/(static_cast<double>(feasibleByColumn[lupe])*static_cast<double>(numberFeasible));
+                      << sumInvConditionNumbers[lupe]/maxSumInvCondNumbers;
             if(originalStoich.columnEntryInKnown(lupe))
                 std::cout << " (known)";
         }
