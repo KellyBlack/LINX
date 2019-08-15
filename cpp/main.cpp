@@ -393,7 +393,9 @@ int main(int argc,char **argv)
     double maxSumInvCondNumbers = 0.0;
     for(int lupe=0;lupe<feasibleByColumn.getLength();++lupe)
     {
-        if(maxSumInvCondNumbers<sumInvConditionNumbers[lupe])
+        if((maxSumInvCondNumbers<sumInvConditionNumbers[lupe]) &&
+           (!originalStoich.columnEntryInKnown(lupe)) &&
+            (feasibleByColumn[lupe]>0))
             maxSumInvCondNumbers = sumInvConditionNumbers[lupe];
     }
 
