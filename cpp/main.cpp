@@ -423,10 +423,18 @@ int main(int argc,char **argv)
         if(feasibleByColumn[lupe]>0)
         {
             // This flow appears in at least one valid representation.
-            std::cout << std::setw(11) << std::setprecision(5)
-                      << sumInvConditionNumbers[lupe]/maxSumInvCondNumbers;
             if(originalStoich.columnEntryInKnown(lupe))
-                std::cout << " (known)";
+            {
+                // This is a known flow
+                std::cout << "    (known)";
+            }
+            else
+            {
+                // This is an unknown flow.
+                std::cout << std::setw(11) << std::setprecision(5)
+                          << sumInvConditionNumbers[lupe]/maxSumInvCondNumbers;
+            }
+
         }
         else
         {
